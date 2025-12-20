@@ -34,8 +34,8 @@ jobs:
           
           echo "📦 Creating backup: $BACKUP_FILE"
           
-          # Run pg_dump with the full connection URL
-          pg_dump "$DATABASE_URL" > $BACKUP_FILE
+          # Run pg_dump with the full connection URL (using explicit v17 path)
+          /usr/lib/postgresql/17/bin/pg_dump "$DATABASE_URL" > $BACKUP_FILE
           
           # Compress the backup
           gzip $BACKUP_FILE

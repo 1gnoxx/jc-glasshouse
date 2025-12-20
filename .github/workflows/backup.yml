@@ -1,0 +1,72 @@
+name: Weekly Database Backup
+
+on:
+  schedule:
+    # Runs every Sunday at 2:00 AM UTC (7:30 AM IST)
+    - cron: '0 2 * * 0'
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Create backup
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          # Extract connection details from DATABASE_URL
+          # Format: postgresql://user:pass@host:port/dbname?params
+          
+          # Create backup filename with timestamp
+          BACKUP_FILE="backup_$(date +%Y%m%d_%H%M%S).sql"
+          
+          echo "📦 Creating backup: $BACKUP_FILE"
+          
+          # Run pg_dump with the full connection URL
+          pg_dump "$DATABASE_URL" > $BACKUP_FILE
+          
+          # Compress the backup
+          gzip $BACKUP_FILE
+          
+          echo "✅ Backup created: ${BACKUP_FILE}.gz"
+          echo "BACKUP_FILE=${BACKUP_FILE}.gz" >> $GITHUB_ENV
+
+      - name: Get current date
+        id: date
+        run: echo "date=$(date +%Y-%m-%d)" >> $GITHUB_OUTPUT
+
+      - name: Upload backup as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: database-backup-${{ steps.date.outputs.date }}
+          path: "*.sql.gz"
+          retention-days: 30
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: backup-${{ steps.date.outputs.date }}
+          name: "Database Backup - ${{ steps.date.outputs.date }}"
+          body: |
+            🗄️ **Automated Weekly Database Backup**
+            
+            - Date: ${{ steps.date.outputs.date }}
+            - Contains all tables and data from JC Glasshouse database
+            
+            To restore, download the .sql.gz file and run:
+            ```bash
+            gunzip backup_*.sql.gz
+            psql $DATABASE_URL < backup_*.sql
+            ```
+          files: "*.sql.gz"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

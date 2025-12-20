@@ -48,16 +48,16 @@ def create_app():
     # Auto-initialize database on startup (for serverless/free tier deployments)
     with app.app_context():
         try:
-            # Create all tables
+            # ONE-TIME FIX: Drop user table to fix column size (128->256)
+            # This is safe because we only have 2 system users
+            db.engine.execute(db.text("DROP TABLE IF EXISTS \"user\" CASCADE"))
+            print("✅ Dropped old user table")
+            
+            # Create all tables with correct schema
             db.create_all()
             print("✅ Database tables created/verified")
             
-            # Create default users if they don't exist
-            # Delete existing users first (one-time fix for password hash column size issue)
-            User.query.filter_by(username='abbas').delete()
-            User.query.filter_by(username='irfan').delete()
-            db.session.commit()
-            
+            # Create default users
             abbas = User(
                 username='abbas',
                 full_name='Abbas',

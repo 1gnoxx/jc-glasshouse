@@ -3,6 +3,7 @@ from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 import click
+import os
 
 from models import db, User
 from config import Config
@@ -43,6 +44,39 @@ def create_app():
     # app.register_blueprint(dashboard_bp, url_prefix='/api/dashboard')
     app.register_blueprint(catalog_bp, url_prefix='/api/catalog')
     # app.register_blueprint(timeline_bp, url_prefix='/api/timeline')
+
+    # Auto-initialize database on startup (for serverless/free tier deployments)
+    with app.app_context():
+        try:
+            # Create all tables
+            db.create_all()
+            print("✅ Database tables created/verified")
+            
+            # Create default users if they don't exist
+            if not User.query.filter_by(username='abbas').first():
+                abbas = User(
+                    username='abbas',
+                    full_name='Abbas',
+                    can_view_financials=True
+                )
+                abbas.set_password('abbas123')
+                db.session.add(abbas)
+                print("✅ Abbas user created")
+            
+            if not User.query.filter_by(username='irfan').first():
+                irfan = User(
+                    username='irfan',
+                    full_name='Irfan',
+                    can_view_financials=False
+                )
+                irfan.set_password('irfan123')
+                db.session.add(irfan)
+                print("✅ Irfan user created")
+            
+            db.session.commit()
+            print("✅ Database initialization complete")
+        except Exception as e:
+            print(f"⚠️ Database initialization note: {e}")
 
     @app.cli.command("create-users")
     def create_users():
@@ -90,3 +124,4 @@ app = create_app()
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
+

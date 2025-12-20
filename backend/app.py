@@ -66,7 +66,7 @@ def create_app():
                 full_name='Abbas',
                 can_view_financials=True
             )
-            abbas.set_password('abbas123')
+            abbas.set_password('abbasarva31377')
             db.session.add(abbas)
             print("✅ Abbas user created")
             
@@ -75,7 +75,7 @@ def create_app():
                 full_name='Irfan',
                 can_view_financials=False
             )
-            irfan.set_password('irfan123')
+            irfan.set_password('irfanbhai123')
             db.session.add(irfan)
             print("✅ Irfan user created")
             

@@ -9,7 +9,7 @@ class User(db.Model):
     """User model for Abbas and Irfan with financial access control"""
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)  # 'abbas' or 'irfan'
-    password_hash = db.Column(db.String(128))
+    password_hash = db.Column(db.String(256))
     full_name = db.Column(db.String(100), nullable=False)  # 'Abbas' or 'Irfan'
     can_view_financials = db.Column(db.Boolean, default=False, nullable=False)  # Abbas: True, Irfan: False
     created_at = db.Column(db.DateTime, server_default=func.now())

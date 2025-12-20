@@ -53,25 +53,28 @@ def create_app():
             print("✅ Database tables created/verified")
             
             # Create default users if they don't exist
-            if not User.query.filter_by(username='abbas').first():
-                abbas = User(
-                    username='abbas',
-                    full_name='Abbas',
-                    can_view_financials=True
-                )
-                abbas.set_password('abbas123')
-                db.session.add(abbas)
-                print("✅ Abbas user created")
+            # Delete existing users first (one-time fix for password hash column size issue)
+            User.query.filter_by(username='abbas').delete()
+            User.query.filter_by(username='irfan').delete()
+            db.session.commit()
             
-            if not User.query.filter_by(username='irfan').first():
-                irfan = User(
-                    username='irfan',
-                    full_name='Irfan',
-                    can_view_financials=False
-                )
-                irfan.set_password('irfan123')
-                db.session.add(irfan)
-                print("✅ Irfan user created")
+            abbas = User(
+                username='abbas',
+                full_name='Abbas',
+                can_view_financials=True
+            )
+            abbas.set_password('abbas123')
+            db.session.add(abbas)
+            print("✅ Abbas user created")
+            
+            irfan = User(
+                username='irfan',
+                full_name='Irfan',
+                can_view_financials=False
+            )
+            irfan.set_password('irfan123')
+            db.session.add(irfan)
+            print("✅ Irfan user created")
             
             db.session.commit()
             print("✅ Database initialization complete")

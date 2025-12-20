@@ -50,7 +50,10 @@ def create_app():
         try:
             # ONE-TIME FIX: Drop user table to fix column size (128->256)
             # This is safe because we only have 2 system users
-            db.engine.execute(db.text("DROP TABLE IF EXISTS \"user\" CASCADE"))
+            from sqlalchemy import text
+            with db.engine.connect() as conn:
+                conn.execute(text("DROP TABLE IF EXISTS \"user\" CASCADE"))
+                conn.commit()
             print("✅ Dropped old user table")
             
             # Create all tables with correct schema

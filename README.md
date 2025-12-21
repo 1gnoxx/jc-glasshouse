@@ -6,22 +6,6 @@ A streamlined inventory and sales management system for wholesale auto glass bus
 
 **Production URL**: https://jcglasshouse.netlify.app
 
-## Features
-
-### For Abbas (Owner)
-- ✅ Full inventory management
-- ✅ Create and view all sales
-- ✅ View sales history and financial reports
-- ✅ See purchase prices and profit margins
-- ✅ Access to all reports and analytics
-
-### For Irfan (Manager)
-- ✅ Full inventory management  
-- ✅ Create new sales/invoices
-- ✅ View today's sales (limited data)
-- ❌ No access to sales history
-- ❌ Cannot see financial data (revenue, profits)
-- ❌ Cannot see purchase prices
 
 ## Tech Stack
 

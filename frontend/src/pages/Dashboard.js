@@ -336,270 +336,272 @@ const Dashboard = () => {
   }
 
   return (
-    <Box p={3} sx={{ bgcolor: 'background.default', minHeight: '100vh' }}>
-      {/* Header Section */}
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
-        <Box>
-          <Typography variant="h4" fontWeight="bold" gutterBottom sx={{ color: 'primary.main' }}>
-            {getTimeGreeting()}, {user?.full_name || user?.username}! 👋
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
-            Here's what's happening with your business today
-          </Typography>
+    <Box p={3} sx={{ bgcolor: 'background.default', minHeight: '100vh', borderRadius: 4 }}>
+      <Paper sx={{ p: 3, borderRadius: 4, bgcolor: 'background.paper' }}>
+        {/* Header Section */}
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
+          <Box>
+            <Typography variant="h4" fontWeight="bold" gutterBottom sx={{ color: 'primary.main' }}>
+              {getTimeGreeting()}, {user?.full_name || user?.username}! 👋
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              Here's what's happening with your business today
+            </Typography>
+          </Box>
+          <Tooltip title="Refresh Data">
+            <IconButton
+              onClick={handleRefresh}
+              disabled={refreshing}
+              sx={{ bgcolor: 'background.paper', boxShadow: 1, '&:hover': { bgcolor: 'action.hover' } }}
+            >
+              <Refresh sx={{ animation: refreshing ? 'spin 1s linear infinite' : 'none' }} />
+            </IconButton>
+          </Tooltip>
         </Box>
-        <Tooltip title="Refresh Data">
-          <IconButton
-            onClick={handleRefresh}
-            disabled={refreshing}
-            sx={{ bgcolor: 'background.paper', boxShadow: 1, '&:hover': { bgcolor: 'action.hover' } }}
-          >
-            <Refresh sx={{ animation: refreshing ? 'spin 1s linear infinite' : 'none' }} />
-          </IconButton>
-        </Tooltip>
-      </Box>
 
-      {/* Main Metric Cards */}
-      <Grid container spacing={3} mb={4}>
-        {canViewFinancials && (
-          <Grid item xs={12} sm={6} md={4}>
+        {/* Main Metric Cards */}
+        <Grid container spacing={3} mb={4}>
+          {canViewFinancials && (
+            <Grid item xs={12} sm={6} md={4}>
+              <MetricCard
+                title="Monthly Sales"
+                value={stats.monthlySalesCount || 0}
+                subtitle={stats.monthlyRevenue ? `₹${stats.monthlyRevenue.toLocaleString()} revenue` : `${new Date().toLocaleDateString('en-US', { month: 'long' })}`}
+                icon={PointOfSale}
+                gradient="linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)"
+                onClick={() => navigate('/sales', { state: { tab: 2 } })}
+              />
+            </Grid>
+          )}
+          <Grid item xs={12} sm={6} md={canViewFinancials ? 4 : 6}>
             <MetricCard
-              title="Monthly Sales"
-              value={stats.monthlySalesCount || 0}
-              subtitle={stats.monthlyRevenue ? `₹${stats.monthlyRevenue.toLocaleString()} revenue` : `${new Date().toLocaleDateString('en-US', { month: 'long' })}`}
-              icon={PointOfSale}
-              gradient="linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)"
-              onClick={() => navigate('/sales', { state: { tab: 2 } })}
-            />
-          </Grid>
-        )}
-        <Grid item xs={12} sm={6} md={canViewFinancials ? 4 : 6}>
-          <MetricCard
-            title="Total Stock"
-            value={stats.totalStock?.toLocaleString() || 0}
-            subtitle={`${stats.totalProducts} product types`}
-            icon={Inventory}
-            gradient="linear-gradient(135deg, #10b981 0%, #059669 100%)"
-            onClick={() => navigate('/inventory')}
-          />
-        </Grid>
-        {canViewFinancials && (
-          <Grid item xs={12} sm={6} md={4}>
-            <MetricCard
-              title="Pending Sales"
-              value={stats.pendingCount || 0}
-              subtitle="Awaiting prices"
-              icon={Schedule}
-              gradient="linear-gradient(135deg, #f59e0b 0%, #d97706 100%)"
-              onClick={() => navigate('/sales', { state: { tab: 1 } })}
-            />
-          </Grid>
-        )}
-      </Grid>
-
-      {/* Quick Actions */}
-      <Paper sx={{ p: 3, mb: 4, borderRadius: 3 }}>
-        <Typography variant="h6" fontWeight="bold" gutterBottom>
-          ⚡ Quick Actions
-        </Typography>
-        <Grid container spacing={2} mt={1}>
-          <Grid item xs={6} sm={3}>
-            <QuickAction
-              title="New Sale"
-              icon={Add}
-              color="#6366f1"
-              onClick={() => navigate('/sales')}
-            />
-          </Grid>
-          <Grid item xs={6} sm={3}>
-            <QuickAction
-              title="Stock Intake"
-              icon={LocalShipping}
-              color="#10b981"
-              onClick={() => navigate('/stock-intake')}
-            />
-          </Grid>
-          <Grid item xs={6} sm={3}>
-            <QuickAction
-              title="View Inventory"
-              icon={Category}
-              color="#f59e0b"
+              title="Total Stock"
+              value={stats.totalStock?.toLocaleString() || 0}
+              subtitle={`${stats.totalProducts} product types`}
+              icon={Inventory}
+              gradient="linear-gradient(135deg, #10b981 0%, #059669 100%)"
               onClick={() => navigate('/inventory')}
             />
           </Grid>
           {canViewFinancials && (
-            <Grid item xs={6} sm={3}>
-              <QuickAction
-                title="View Reports"
-                icon={Assessment}
-                color="#8b5cf6"
-                onClick={() => navigate('/reports')}
+            <Grid item xs={12} sm={6} md={4}>
+              <MetricCard
+                title="Pending Sales"
+                value={stats.pendingCount || 0}
+                subtitle="Awaiting prices"
+                icon={Schedule}
+                gradient="linear-gradient(135deg, #f59e0b 0%, #d97706 100%)"
+                onClick={() => navigate('/sales', { state: { tab: 1 } })}
               />
             </Grid>
           )}
         </Grid>
-      </Paper>
 
-      {/* Financial sections - only for users with financial access */}
-      {canViewFinancials && (
-        <Grid container spacing={3}>
-          {/* Unpaid Sales Section */}
-          <Grid item xs={12}>
-            {/* Unpaid Sales Table */}
-            <Paper sx={{ p: 3, borderRadius: 3, mb: 3 }}>
-              <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                <Box>
-                  <Typography variant="h6" fontWeight="bold">
-                    💰 Outstanding Payments
-                  </Typography>
-                  {stats.totalOutstanding > 0 && (
-                    <Typography variant="body2" color="error.main">
-                      Total Outstanding: ₹{stats.totalOutstanding?.toLocaleString()}
-                    </Typography>
-                  )}
-                </Box>
-                <Button
-                  size="small"
-                  endIcon={<ArrowForward />}
-                  onClick={() => navigate('/sales', { state: { tab: 2 } })}
-                >
-                  View All Sales
-                </Button>
-              </Box>
+        {/* Quick Actions */}
+        <Paper sx={{ p: 3, mb: 4, borderRadius: 3 }}>
+          <Typography variant="h6" fontWeight="bold" gutterBottom>
+            ⚡ Quick Actions
+          </Typography>
+          <Grid container spacing={2} mt={1}>
+            <Grid item xs={6} sm={3}>
+              <QuickAction
+                title="New Sale"
+                icon={Add}
+                color="#6366f1"
+                onClick={() => navigate('/sales')}
+              />
+            </Grid>
+            <Grid item xs={6} sm={3}>
+              <QuickAction
+                title="Stock Intake"
+                icon={LocalShipping}
+                color="#10b981"
+                onClick={() => navigate('/stock-intake')}
+              />
+            </Grid>
+            <Grid item xs={6} sm={3}>
+              <QuickAction
+                title="View Inventory"
+                icon={Category}
+                color="#f59e0b"
+                onClick={() => navigate('/inventory')}
+              />
+            </Grid>
+            {canViewFinancials && (
+              <Grid item xs={6} sm={3}>
+                <QuickAction
+                  title="View Reports"
+                  icon={Assessment}
+                  color="#8b5cf6"
+                  onClick={() => navigate('/reports')}
+                />
+              </Grid>
+            )}
+          </Grid>
+        </Paper>
 
-              {unpaidSales.length > 0 ? (
-                <TableContainer>
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell sx={{ fontWeight: 'bold' }}>Invoice</TableCell>
-                        <TableCell sx={{ fontWeight: 'bold' }}>Customer</TableCell>
-                        <TableCell align="center" sx={{ fontWeight: 'bold' }}>Date</TableCell>
-                        <TableCell align="center" sx={{ fontWeight: 'bold' }}>Status</TableCell>
-                        <TableCell align="right" sx={{ fontWeight: 'bold' }}>Total</TableCell>
-                        <TableCell align="right" sx={{ fontWeight: 'bold' }}>Paid</TableCell>
-                        <TableCell align="right" sx={{ fontWeight: 'bold', color: 'error.main' }}>Balance Due</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {unpaidSales.slice(0, 10).map((sale) => {
-                        const balanceDue = (sale.total_amount || 0) - (sale.amount_paid || 0);
-                        return (
-                          <TableRow
-                            key={sale.id}
-                            hover
-                            sx={{ cursor: 'pointer' }}
-                            onClick={() => navigate('/sales', { state: { tab: 2 } })}
-                          >
-                            <TableCell>
-                              <Typography variant="body2" fontWeight="medium">
-                                {sale.invoice_number}
-                              </Typography>
-                            </TableCell>
-                            <TableCell>{sale.customer_name}</TableCell>
-                            <TableCell align="center">
-                              <Typography variant="caption">
-                                {new Date(sale.sale_date).toLocaleDateString()}
-                              </Typography>
-                            </TableCell>
-                            <TableCell align="center">
-                              <Chip
-                                label={sale.payment_status}
-                                size="small"
-                                sx={{
-                                  bgcolor: alpha(getPaymentStatusColor(sale.payment_status), 0.1),
-                                  color: getPaymentStatusColor(sale.payment_status),
-                                  fontWeight: 500
-                                }}
-                              />
-                            </TableCell>
-                            <TableCell align="right">
-                              <Typography variant="body2">
-                                ₹{sale.total_amount?.toLocaleString() || 0}
-                              </Typography>
-                            </TableCell>
-                            <TableCell align="right">
-                              <Typography variant="body2" color="success.main">
-                                ₹{sale.amount_paid?.toLocaleString() || 0}
-                              </Typography>
-                            </TableCell>
-                            <TableCell align="right">
-                              <Typography variant="body2" fontWeight="bold" color="error.main">
-                                ₹{balanceDue.toLocaleString()}
-                              </Typography>
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              ) : (
-                <Box py={4} textAlign="center">
-                  <CheckCircle sx={{ fontSize: 48, color: 'success.main', mb: 1 }} />
-                  <Typography color="text.secondary">
-                    All payments received! No outstanding dues.
-                  </Typography>
-                </Box>
-              )}
-            </Paper>
-
-            {/* Pending Sales */}
-            {pendingSales.length > 0 && (
-              <Paper sx={{ p: 3, borderRadius: 3 }}>
+        {/* Financial sections - only for users with financial access */}
+        {canViewFinancials && (
+          <Grid container spacing={3}>
+            {/* Unpaid Sales Section */}
+            <Grid item xs={12}>
+              {/* Unpaid Sales Table */}
+              <Paper sx={{ p: 3, borderRadius: 3, mb: 3 }}>
                 <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                  <Typography variant="h6" fontWeight="bold">
-                    ⏳ Pending Sales
-                  </Typography>
+                  <Box>
+                    <Typography variant="h6" fontWeight="bold">
+                      💰 Outstanding Payments
+                    </Typography>
+                    {stats.totalOutstanding > 0 && (
+                      <Typography variant="body2" color="error.main">
+                        Total Outstanding: ₹{stats.totalOutstanding?.toLocaleString()}
+                      </Typography>
+                    )}
+                  </Box>
                   <Button
                     size="small"
                     endIcon={<ArrowForward />}
-                    onClick={() => navigate('/sales', { state: { tab: 1 } })}
+                    onClick={() => navigate('/sales', { state: { tab: 2 } })}
                   >
-                    Complete All
+                    View All Sales
                   </Button>
                 </Box>
-                <Grid container spacing={2}>
-                  {pendingSales.slice(0, 4).map((sale) => (
-                    <Grid item xs={12} sm={6} key={sale.id}>
-                      <Paper
-                        variant="outlined"
-                        sx={{
-                          p: 2,
-                          cursor: 'pointer',
-                          borderColor: '#f59e0b',
-                          bgcolor: alpha('#f59e0b', 0.02),
-                          '&:hover': { boxShadow: 2 }
-                        }}
-                        onClick={() => navigate('/sales', { state: { tab: 1 } })}
-                      >
-                        <Typography variant="subtitle2" fontWeight="bold">
-                          {sale.invoice_number}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {sale.customer_name}
-                        </Typography>
-                        <Typography variant="caption" color="warning.main">
-                          {sale.items_count} items • Needs pricing
-                        </Typography>
-                      </Paper>
-                    </Grid>
-                  ))}
-                </Grid>
-              </Paper>
-            )}
-          </Grid>
-        </Grid>
-      )}
 
-      {/* CSS for refresh animation */}
-      <style>
-        {`
+                {unpaidSales.length > 0 ? (
+                  <TableContainer>
+                    <Table size="small">
+                      <TableHead>
+                        <TableRow>
+                          <TableCell sx={{ fontWeight: 'bold' }}>Invoice</TableCell>
+                          <TableCell sx={{ fontWeight: 'bold' }}>Customer</TableCell>
+                          <TableCell align="center" sx={{ fontWeight: 'bold' }}>Date</TableCell>
+                          <TableCell align="center" sx={{ fontWeight: 'bold' }}>Status</TableCell>
+                          <TableCell align="right" sx={{ fontWeight: 'bold' }}>Total</TableCell>
+                          <TableCell align="right" sx={{ fontWeight: 'bold' }}>Paid</TableCell>
+                          <TableCell align="right" sx={{ fontWeight: 'bold', color: 'error.main' }}>Balance Due</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {unpaidSales.slice(0, 10).map((sale) => {
+                          const balanceDue = (sale.total_amount || 0) - (sale.amount_paid || 0);
+                          return (
+                            <TableRow
+                              key={sale.id}
+                              hover
+                              sx={{ cursor: 'pointer' }}
+                              onClick={() => navigate('/sales', { state: { tab: 2 } })}
+                            >
+                              <TableCell>
+                                <Typography variant="body2" fontWeight="medium">
+                                  {sale.invoice_number}
+                                </Typography>
+                              </TableCell>
+                              <TableCell>{sale.customer_name}</TableCell>
+                              <TableCell align="center">
+                                <Typography variant="caption">
+                                  {new Date(sale.sale_date).toLocaleDateString()}
+                                </Typography>
+                              </TableCell>
+                              <TableCell align="center">
+                                <Chip
+                                  label={sale.payment_status}
+                                  size="small"
+                                  sx={{
+                                    bgcolor: alpha(getPaymentStatusColor(sale.payment_status), 0.1),
+                                    color: getPaymentStatusColor(sale.payment_status),
+                                    fontWeight: 500
+                                  }}
+                                />
+                              </TableCell>
+                              <TableCell align="right">
+                                <Typography variant="body2">
+                                  ₹{sale.total_amount?.toLocaleString() || 0}
+                                </Typography>
+                              </TableCell>
+                              <TableCell align="right">
+                                <Typography variant="body2" color="success.main">
+                                  ₹{sale.amount_paid?.toLocaleString() || 0}
+                                </Typography>
+                              </TableCell>
+                              <TableCell align="right">
+                                <Typography variant="body2" fontWeight="bold" color="error.main">
+                                  ₹{balanceDue.toLocaleString()}
+                                </Typography>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                ) : (
+                  <Box py={4} textAlign="center">
+                    <CheckCircle sx={{ fontSize: 48, color: 'success.main', mb: 1 }} />
+                    <Typography color="text.secondary">
+                      All payments received! No outstanding dues.
+                    </Typography>
+                  </Box>
+                )}
+              </Paper>
+
+              {/* Pending Sales */}
+              {pendingSales.length > 0 && (
+                <Paper sx={{ p: 3, borderRadius: 3 }}>
+                  <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                    <Typography variant="h6" fontWeight="bold">
+                      ⏳ Pending Sales
+                    </Typography>
+                    <Button
+                      size="small"
+                      endIcon={<ArrowForward />}
+                      onClick={() => navigate('/sales', { state: { tab: 1 } })}
+                    >
+                      Complete All
+                    </Button>
+                  </Box>
+                  <Grid container spacing={2}>
+                    {pendingSales.slice(0, 4).map((sale) => (
+                      <Grid item xs={12} sm={6} key={sale.id}>
+                        <Paper
+                          variant="outlined"
+                          sx={{
+                            p: 2,
+                            cursor: 'pointer',
+                            borderColor: '#f59e0b',
+                            bgcolor: alpha('#f59e0b', 0.02),
+                            '&:hover': { boxShadow: 2 }
+                          }}
+                          onClick={() => navigate('/sales', { state: { tab: 1 } })}
+                        >
+                          <Typography variant="subtitle2" fontWeight="bold">
+                            {sale.invoice_number}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            {sale.customer_name}
+                          </Typography>
+                          <Typography variant="caption" color="warning.main">
+                            {sale.items_count} items • Needs pricing
+                          </Typography>
+                        </Paper>
+                      </Grid>
+                    ))}
+                  </Grid>
+                </Paper>
+              )}
+            </Grid>
+          </Grid>
+        )}
+
+        {/* CSS for refresh animation */}
+        <style>
+          {`
           @keyframes spin {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
           }
         `}
-      </style>
+        </style>
+      </Paper>
     </Box>
   );
 };

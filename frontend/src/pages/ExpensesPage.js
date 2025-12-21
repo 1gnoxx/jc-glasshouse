@@ -127,126 +127,128 @@ const ExpensesPage = () => {
     };
 
     return (
-        <Box sx={{ p: { xs: 0, sm: 1 } }}>
-            <Box
-                display="flex"
-                flexDirection={{ xs: 'column', sm: 'row' }}
-                justifyContent="space-between"
-                alignItems={{ xs: 'stretch', sm: 'center' }}
-                gap={2}
-                mb={3}
-            >
-                <Typography variant="h5" sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' }, color: 'primary.main' }}>
-                    Expenses
-                </Typography>
-                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                    <TextField
-                        type="month"
-                        size="small"
-                        value={selectedMonth}
-                        onChange={(e) => setSelectedMonth(e.target.value)}
-                        InputLabelProps={{ shrink: true }}
-                        sx={{ minWidth: 150 }}
-                    />
-                    <Button variant="contained" startIcon={<Add />} onClick={() => setDialog(true)}>
-                        Add
-                    </Button>
+        <Box p={3} sx={{ bgcolor: 'background.default', minHeight: '100vh', borderRadius: 4 }}>
+            <Paper sx={{ p: 3, borderRadius: 4, bgcolor: 'background.paper' }}>
+                <Box
+                    display="flex"
+                    flexDirection={{ xs: 'column', sm: 'row' }}
+                    justifyContent="space-between"
+                    alignItems={{ xs: 'stretch', sm: 'center' }}
+                    gap={2}
+                    mb={3}
+                >
+                    <Typography variant="h5" sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' }, color: 'primary.main' }}>
+                        Expenses
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                        <TextField
+                            type="month"
+                            size="small"
+                            value={selectedMonth}
+                            onChange={(e) => setSelectedMonth(e.target.value)}
+                            InputLabelProps={{ shrink: true }}
+                            sx={{ minWidth: 150 }}
+                        />
+                        <Button variant="contained" startIcon={<Add />} onClick={() => setDialog(true)}>
+                            Add
+                        </Button>
+                    </Box>
                 </Box>
-            </Box>
 
-            <Grid container spacing={3} sx={{ mb: 3 }}>
-                {Object.entries(filteredSummaryCategories || {}).map(([cat, amount]) => (
-                    <Grid item xs={12} sm={6} md={4} key={cat}>
-                        <Card>
+                <Grid container spacing={3} sx={{ mb: 3 }}>
+                    {Object.entries(filteredSummaryCategories || {}).map(([cat, amount]) => (
+                        <Grid item xs={12} sm={6} md={4} key={cat}>
+                            <Card>
+                                <CardContent>
+                                    <Typography variant="body2" color="text.secondary">
+                                        {cat.replace('_', ' ').toUpperCase()}
+                                    </Typography>
+                                    <Typography variant="h5" sx={{ color: categoryColors[cat] }}>
+                                        ₹{amount.toLocaleString()}
+                                    </Typography>
+                                </CardContent>
+                            </Card>
+                        </Grid>
+                    ))}
+                    <Grid item xs={12} sm={6} md={4}>
+                        <Card sx={{ bgcolor: 'action.selected' }}>
                             <CardContent>
-                                <Typography variant="body2" color="text.secondary">
-                                    {cat.replace('_', ' ').toUpperCase()}
-                                </Typography>
-                                <Typography variant="h5" sx={{ color: categoryColors[cat] }}>
-                                    ₹{amount.toLocaleString()}
-                                </Typography>
+                                <Typography variant="body2" color="text.secondary">TOTAL</Typography>
+                                <Typography variant="h5" fontWeight="bold">₹{filteredSummaryTotal?.toLocaleString()}</Typography>
                             </CardContent>
                         </Card>
                     </Grid>
-                ))}
-                <Grid item xs={12} sm={6} md={4}>
-                    <Card sx={{ bgcolor: '#f5f5f5' }}>
-                        <CardContent>
-                            <Typography variant="body2" color="text.secondary">TOTAL</Typography>
-                            <Typography variant="h5" fontWeight="bold">₹{filteredSummaryTotal?.toLocaleString()}</Typography>
-                        </CardContent>
-                    </Card>
                 </Grid>
-            </Grid>
 
-            <TableContainer component={Paper} sx={{ maxWidth: '100%', overflowX: 'auto' }}>
-                <Table>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>Date</TableCell>
-                            <TableCell>Category</TableCell>
-                            <TableCell>Description</TableCell>
-                            <TableCell align="right">Amount</TableCell>
-                            <TableCell align="right">Actions</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {loading ? (
-                            <TableRow><TableCell colSpan={5} align="center"><CircularProgress /></TableCell></TableRow>
-                        ) : filteredExpenses.length === 0 ? (
-                            <TableRow><TableCell colSpan={5} align="center">No expenses found</TableCell></TableRow>
-                        ) : (
-                            filteredExpenses.map((exp) => (
-                                <TableRow key={exp.id}>
-                                    <TableCell>{new Date(exp.date).toLocaleDateString()}</TableCell>
-                                    <TableCell>
-                                        <Chip label={exp.category.replace('_', ' ')} size="small" sx={{ bgcolor: categoryColors[exp.category], color: 'white' }} />
-                                    </TableCell>
-                                    <TableCell>{exp.description || '-'}</TableCell>
-                                    <TableCell align="right">₹{exp.amount.toLocaleString()}</TableCell>
-                                    <TableCell align="right">
-                                        <IconButton size="small" onClick={() => handleEdit(exp)}><Edit /></IconButton>
-                                        <IconButton size="small" color="error" onClick={() => handleDelete(exp.id)}><Delete /></IconButton>
-                                    </TableCell>
-                                </TableRow>
-                            ))
-                        )}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+                <TableContainer component={Paper} sx={{ maxWidth: '100%', overflowX: 'auto' }}>
+                    <Table>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>Date</TableCell>
+                                <TableCell>Category</TableCell>
+                                <TableCell>Description</TableCell>
+                                <TableCell align="right">Amount</TableCell>
+                                <TableCell align="right">Actions</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {loading ? (
+                                <TableRow><TableCell colSpan={5} align="center"><CircularProgress /></TableCell></TableRow>
+                            ) : filteredExpenses.length === 0 ? (
+                                <TableRow><TableCell colSpan={5} align="center">No expenses found</TableCell></TableRow>
+                            ) : (
+                                filteredExpenses.map((exp) => (
+                                    <TableRow key={exp.id}>
+                                        <TableCell>{new Date(exp.date).toLocaleDateString()}</TableCell>
+                                        <TableCell>
+                                            <Chip label={exp.category.replace('_', ' ')} size="small" sx={{ bgcolor: categoryColors[exp.category], color: 'white' }} />
+                                        </TableCell>
+                                        <TableCell>{exp.description || '-'}</TableCell>
+                                        <TableCell align="right">₹{exp.amount.toLocaleString()}</TableCell>
+                                        <TableCell align="right">
+                                            <IconButton size="small" onClick={() => handleEdit(exp)}><Edit /></IconButton>
+                                            <IconButton size="small" color="error" onClick={() => handleDelete(exp.id)}><Delete /></IconButton>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            )}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
 
-            <Dialog open={dialog} onClose={() => { setDialog(false); setEditingId(null); }} maxWidth="sm" fullWidth>
-                <DialogTitle>{editingId ? 'Edit' : 'Add'} Expense</DialogTitle>
-                <DialogContent>
-                    <Grid container spacing={2} sx={{ mt: 1 }}>
-                        <Grid item xs={12}>
-                            <TextField fullWidth type="date" label="Date" value={formData.date} onChange={(e) => setFormData({ ...formData, date: e.target.value })} InputLabelProps={{ shrink: true }} />
+                <Dialog open={dialog} onClose={() => { setDialog(false); setEditingId(null); }} maxWidth="sm" fullWidth>
+                    <DialogTitle>{editingId ? 'Edit' : 'Add'} Expense</DialogTitle>
+                    <DialogContent>
+                        <Grid container spacing={2} sx={{ mt: 1 }}>
+                            <Grid item xs={12}>
+                                <TextField fullWidth type="date" label="Date" value={formData.date} onChange={(e) => setFormData({ ...formData, date: e.target.value })} InputLabelProps={{ shrink: true }} />
+                            </Grid>
+                            <Grid item xs={12}>
+                                <TextField select fullWidth label="Category" value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })}>
+                                    <MenuItem value="salary">Salary</MenuItem>
+                                    <MenuItem value="workers">Workers</MenuItem>
+                                    <MenuItem value="rent">Rent</MenuItem>
+                                    <MenuItem value="transport">Transport</MenuItem>
+                                    {canViewFinancials && <MenuItem value="stock_purchase">Stock Purchase</MenuItem>}
+                                    <MenuItem value="utilities">Utilities</MenuItem>
+                                    <MenuItem value="electricity_bill">Electricity Bill</MenuItem>
+                                    <MenuItem value="other">Other</MenuItem>
+                                </TextField>
+                            </Grid>
+                            <Grid item xs={12}>
+                                <TextField fullWidth type="number" label="Amount" value={formData.amount} onChange={(e) => setFormData({ ...formData, amount: e.target.value })} />
+                            </Grid>
+                            <Grid item xs={12}>
+                                <TextField fullWidth multiline rows={2} label="Description" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
+                            </Grid>
                         </Grid>
-                        <Grid item xs={12}>
-                            <TextField select fullWidth label="Category" value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })}>
-                                <MenuItem value="salary">Salary</MenuItem>
-                                <MenuItem value="workers">Workers</MenuItem>
-                                <MenuItem value="rent">Rent</MenuItem>
-                                <MenuItem value="transport">Transport</MenuItem>
-                                {canViewFinancials && <MenuItem value="stock_purchase">Stock Purchase</MenuItem>}
-                                <MenuItem value="utilities">Utilities</MenuItem>
-                                <MenuItem value="electricity_bill">Electricity Bill</MenuItem>
-                                <MenuItem value="other">Other</MenuItem>
-                            </TextField>
-                        </Grid>
-                        <Grid item xs={12}>
-                            <TextField fullWidth type="number" label="Amount" value={formData.amount} onChange={(e) => setFormData({ ...formData, amount: e.target.value })} />
-                        </Grid>
-                        <Grid item xs={12}>
-                            <TextField fullWidth multiline rows={2} label="Description" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
-                        </Grid>
-                    </Grid>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => { setDialog(false); setEditingId(null); }}>Cancel</Button>
-                    <Button onClick={handleSubmit} variant="contained">Save</Button>
-                </DialogActions>
-            </Dialog>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => { setDialog(false); setEditingId(null); }}>Cancel</Button>
+                        <Button onClick={handleSubmit} variant="contained">Save</Button>
+                    </DialogActions>
+                </Dialog>
+            </Paper>
         </Box>
     );
 };

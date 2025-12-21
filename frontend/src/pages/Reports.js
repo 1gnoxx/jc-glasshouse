@@ -920,406 +920,408 @@ const Reports = () => {
   }
 
   return (
-    <Box p={3} sx={{ bgcolor: 'background.default', minHeight: '100vh' }}>
-      {/* Header */}
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          mb: 4,
-          flexWrap: 'wrap',
-          gap: 2
-        }}
-      >
-        <Box>
-          <Typography variant="h4" fontWeight="bold" gutterBottom sx={{ color: 'primary.main' }}>
-            📊 Analytics Dashboard
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Financial overview and business insights for {new Date(selectedMonth + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-          </Typography>
-        </Box>
-        <Box display="flex" gap={2} alignItems="center">
-          <TextField
-            type="month"
-            value={selectedMonth}
-            onChange={(e) => setSelectedMonth(e.target.value)}
-            size="small"
-            sx={{
-              bgcolor: 'background.paper',
-              borderRadius: 1,
-              '& .MuiOutlinedInput-root': {
-                borderRadius: 2
-              }
-            }}
-          />
-          <Tooltip title="Refresh Data">
-            <IconButton
-              onClick={handleRefresh}
-              disabled={refreshing}
-              sx={{ bgcolor: 'background.paper', boxShadow: 1, '&:hover': { bgcolor: 'action.hover' } }}
-            >
-              <Refresh sx={{ animation: refreshing ? 'spin 1s linear infinite' : 'none' }} />
-            </IconButton>
-          </Tooltip>
-          <Button
-            variant="contained"
-            startIcon={exporting ? <CircularProgress size={18} color="inherit" /> : <Download />}
-            endIcon={<ExpandMore />}
-            onClick={handleExportMenuOpen}
-            disabled={exporting}
-            sx={{
-              background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-              borderRadius: 2,
-              textTransform: 'none',
-              px: 3,
-              minWidth: 160
-            }}
-          >
-            {exporting ? 'Exporting...' : 'Export Report'}
-          </Button>
-          <Menu
-            anchorEl={exportMenuAnchor}
-            open={Boolean(exportMenuAnchor)}
-            onClose={handleExportMenuClose}
-            PaperProps={{
-              sx: {
-                mt: 1,
-                minWidth: 280,
-                borderRadius: 2,
-                boxShadow: '0 10px 40px rgba(0,0,0,0.15)',
-                overflow: 'visible',
-                '&::before': {
-                  content: '""',
-                  display: 'block',
-                  position: 'absolute',
-                  top: 0,
-                  right: 20,
-                  width: 10,
-                  height: 10,
-                  bgcolor: 'background.paper',
-                  transform: 'translateY(-50%) rotate(45deg)',
-                  zIndex: 0,
-                }
-              }
-            }}
-            transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-            anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-          >
-            <Box sx={{ px: 2, py: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>
-              <Typography variant="subtitle2" fontWeight="bold" color="text.secondary">
-                📥 Export Options
-              </Typography>
-            </Box>
-            <MenuItem
-              onClick={handleExportExcel}
-              sx={{
-                py: 1.5,
-                px: 2,
-                '&:hover': { bgcolor: 'action.hover' }
-              }}
-            >
-              <ListItemIcon>
-                <TableChart sx={{ color: '#10b981' }} />
-              </ListItemIcon>
-              <ListItemText
-                primary={<Typography fontWeight="medium">Export to Excel</Typography>}
-                secondary={
-                  <Typography variant="caption" color="text.secondary">
-                    Multi-sheet workbook with all data
-                  </Typography>
-                }
-              />
-            </MenuItem>
-            <MenuItem
-              onClick={handleExportPDF}
-              sx={{
-                py: 1.5,
-                px: 2,
-                '&:hover': { bgcolor: 'action.hover' }
-              }}
-            >
-              <ListItemIcon>
-                <PictureAsPdf sx={{ color: '#ef4444' }} />
-              </ListItemIcon>
-              <ListItemText
-                primary={<Typography fontWeight="medium">Export to PDF</Typography>}
-                secondary={
-                  <Typography variant="caption" color="text.secondary">
-                    Formatted report with tables
-                  </Typography>
-                }
-              />
-            </MenuItem>
-          </Menu>
-        </Box>
-      </Box>
-
-      {/* Main Metric Cards */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} lg={3}>
-          <MetricCard
-            title="Total Revenue"
-            value={`₹${analytics.revenue.toLocaleString()}`}
-            subtitle={`${analytics.salesCount} completed sales`}
-            icon={TrendingUp}
-            gradient="linear-gradient(135deg, #10b981 0%, #059669 100%)"
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} lg={3}>
-          <MetricCard
-            title="Total Expenses"
-            value={`₹${analytics.expenses.toLocaleString()}`}
-            subtitle="Including stock purchases"
-            icon={Receipt}
-            gradient="linear-gradient(135deg, #ef4444 0%, #dc2626 100%)"
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} lg={3}>
-          <MetricCard
-            title="Net Profit"
-            value={`₹${analytics.profit.toLocaleString()}`}
-            subtitle={`${analytics.profitMargin.toFixed(1)}% margin`}
-            icon={AccountBalance}
-            gradient={analytics.profit >= 0
-              ? "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)"
-              : "linear-gradient(135deg, #f97316 0%, #ea580c 100%)"
-            }
-          />
-        </Grid>
-      </Grid>
-
-      {/* Quick Stats Row */}
-      <Grid container spacing={2} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={4}>
-          <SmallStatCard
-            title="Paid Invoices"
-            value={analytics.paymentStatusCounts?.paid || 0}
-            color="#10b981"
-            icon={CheckCircle}
-          />
-        </Grid>
-        <Grid item xs={12} sm={4}>
-          <ClickableStatCard
-            title="Pending Sales"
-            value={analytics.pendingSalesCount}
-            color="#f59e0b"
-            icon={Schedule}
-            onClick={() => navigate('/sales', { state: { tab: 1 } })}
-          />
-        </Grid>
-        <Grid item xs={12} sm={4}>
-          <SmallStatCard
-            title="Unpaid Invoices"
-            value={analytics.paymentStatusCounts?.unpaid || 0}
-            color="#ef4444"
-            icon={Payment}
-          />
-        </Grid>
-      </Grid>
-
-      {/* Sales Trend Chart */}
-      <Paper sx={{ p: 3, mb: 4, borderRadius: 3, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
-        <Typography variant="h6" fontWeight="bold" gutterBottom>
-          📈 Daily Sales Trend
-        </Typography>
-        <Typography variant="body2" color="text.secondary" mb={3}>
-          Revenue performance throughout the month
-        </Typography>
-        <Box height={300}>
-          <Line data={salesTrendData} options={chartOptions} />
-        </Box>
-      </Paper>
-
-      {/* Charts Row */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        {/* Revenue vs Expenses */}
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 3, borderRadius: 3, height: '100%', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
-            <Typography variant="h6" fontWeight="bold" gutterBottom>
-              💰 Revenue vs Expenses
+    <Box p={3} sx={{ bgcolor: 'background.default', minHeight: '100vh', borderRadius: 4 }}>
+      <Paper sx={{ p: 3, borderRadius: 4, bgcolor: 'background.paper' }}>
+        {/* Header */}
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            mb: 4,
+            flexWrap: 'wrap',
+            gap: 2
+          }}
+        >
+          <Box>
+            <Typography variant="h4" fontWeight="bold" gutterBottom sx={{ color: 'primary.main' }}>
+              📊 Analytics Dashboard
             </Typography>
-            <Box height={280}>
-              <Bar data={revenueVsExpensesData} options={chartOptions} />
-            </Box>
-          </Paper>
-        </Grid>
-
-        {/* Payment Status */}
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 3, borderRadius: 3, height: '100%', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
-            <Typography variant="h6" fontWeight="bold" gutterBottom>
-              💳 Payment Status
-            </Typography>
-            {(analytics.paymentStatusCounts?.paid || 0) +
-              (analytics.paymentStatusCounts?.partial || 0) +
-              (analytics.paymentStatusCounts?.unpaid || 0) > 0 ? (
-              <Box height={280} display="flex" justifyContent="center">
-                <Doughnut data={paymentStatusData} options={doughnutOptions} />
-              </Box>
-            ) : (
-              <Box height={280} display="flex" alignItems="center" justifyContent="center">
-                <Typography color="text.secondary">No sales data for this month</Typography>
-              </Box>
-            )}
-          </Paper>
-        </Grid>
-      </Grid>
-
-      {/* Second Charts Row */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        {/* Expense Breakdown */}
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 3, borderRadius: 3, height: '100%', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
-            <Typography variant="h6" fontWeight="bold" gutterBottom>
-              📋 Expense Breakdown
-            </Typography>
-            {Object.keys(analytics.expenseBreakdown).length > 0 ? (
-              <Box height={280} display="flex" justifyContent="center">
-                <Pie data={expenseBreakdownData} options={doughnutOptions} />
-              </Box>
-            ) : (
-              <Box height={280} display="flex" alignItems="center" justifyContent="center">
-                <Typography color="text.secondary">No expenses recorded this month</Typography>
-              </Box>
-            )}
-          </Paper>
-        </Grid>
-
-        {/* Stock by Category */}
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 3, borderRadius: 3, height: '100%', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
-            <Typography variant="h6" fontWeight="bold" gutterBottom>
-              📦 Stock Levels by Category
-            </Typography>
-            {Object.keys(analytics.stockByTag || {}).length > 0 ? (
-              <Box height={280}>
-                <Bar data={stockByTagData} options={chartOptions} />
-              </Box>
-            ) : (
-              <Box height={280} display="flex" alignItems="center" justifyContent="center">
-                <Typography color="text.secondary">No stock data available</Typography>
-              </Box>
-            )}
-          </Paper>
-        </Grid>
-      </Grid>
-
-      {/* Top Products Table */}
-      <Paper sx={{ p: 3, borderRadius: 3, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
-        <Typography variant="h6" fontWeight="bold" gutterBottom>
-          🏆 Top Selling Products
-        </Typography>
-        <Typography variant="body2" color="text.secondary" mb={3}>
-          Best performing products by revenue
-        </Typography>
-        {analytics.topProducts.length > 0 ? (
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Rank</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Product</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 'bold' }}>Units Sold</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 'bold' }}>Revenue</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', width: '30%' }}>Performance</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {analytics.topProducts.map((product, index) => (
-                  <TableRow key={index} hover>
-                    <TableCell>
-                      <Chip
-                        label={`#${index + 1}`}
-                        size="small"
-                        sx={{
-                          bgcolor: index === 0 ? '#fef3c7' : index === 1 ? '#e5e7eb' : index === 2 ? '#fed7aa' : '#f1f5f9',
-                          color: index === 0 ? '#92400e' : index === 1 ? '#374151' : index === 2 ? '#9a3412' : '#475569',
-                          fontWeight: 'bold'
-                        }}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body2" fontWeight="medium">
-                        {product.name}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {product.code}
-                      </Typography>
-                    </TableCell>
-                    <TableCell align="right">
-                      <Chip label={product.quantity} size="small" variant="outlined" />
-                    </TableCell>
-                    <TableCell align="right">
-                      <Typography variant="body2" fontWeight="bold" color="success.main">
-                        ₹{product.revenue.toLocaleString()}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Box display="flex" alignItems="center" gap={1}>
-                        <LinearProgress
-                          variant="determinate"
-                          value={product.percentage}
-                          sx={{
-                            flex: 1,
-                            height: 8,
-                            borderRadius: 4,
-                            bgcolor: 'rgba(99, 102, 241, 0.1)',
-                            '& .MuiLinearProgress-bar': {
-                              borderRadius: 4,
-                              background: 'linear-gradient(90deg, #6366f1, #8b5cf6)'
-                            }
-                          }}
-                        />
-                        <Typography variant="caption" color="text.secondary" sx={{ minWidth: 40 }}>
-                          {product.percentage.toFixed(0)}%
-                        </Typography>
-                      </Box>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        ) : (
-          <Box py={4} textAlign="center">
-            <Typography color="text.secondary">
-              No sales data available. Complete some sales to see top products!
+            <Typography variant="body2" color="text.secondary">
+              Financial overview and business insights for {new Date(selectedMonth + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
             </Typography>
           </Box>
-        )}
-      </Paper>
+          <Box display="flex" gap={2} alignItems="center">
+            <TextField
+              type="month"
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+              size="small"
+              sx={{
+                bgcolor: 'background.paper',
+                borderRadius: 1,
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2
+                }
+              }}
+            />
+            <Tooltip title="Refresh Data">
+              <IconButton
+                onClick={handleRefresh}
+                disabled={refreshing}
+                sx={{ bgcolor: 'background.paper', boxShadow: 1, '&:hover': { bgcolor: 'action.hover' } }}
+              >
+                <Refresh sx={{ animation: refreshing ? 'spin 1s linear infinite' : 'none' }} />
+              </IconButton>
+            </Tooltip>
+            <Button
+              variant="contained"
+              startIcon={exporting ? <CircularProgress size={18} color="inherit" /> : <Download />}
+              endIcon={<ExpandMore />}
+              onClick={handleExportMenuOpen}
+              disabled={exporting}
+              sx={{
+                background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                borderRadius: 2,
+                textTransform: 'none',
+                px: 3,
+                minWidth: 160
+              }}
+            >
+              {exporting ? 'Exporting...' : 'Export Report'}
+            </Button>
+            <Menu
+              anchorEl={exportMenuAnchor}
+              open={Boolean(exportMenuAnchor)}
+              onClose={handleExportMenuClose}
+              PaperProps={{
+                sx: {
+                  mt: 1,
+                  minWidth: 280,
+                  borderRadius: 2,
+                  boxShadow: '0 10px 40px rgba(0,0,0,0.15)',
+                  overflow: 'visible',
+                  '&::before': {
+                    content: '""',
+                    display: 'block',
+                    position: 'absolute',
+                    top: 0,
+                    right: 20,
+                    width: 10,
+                    height: 10,
+                    bgcolor: 'background.paper',
+                    transform: 'translateY(-50%) rotate(45deg)',
+                    zIndex: 0,
+                  }
+                }
+              }}
+              transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+              anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+            >
+              <Box sx={{ px: 2, py: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>
+                <Typography variant="subtitle2" fontWeight="bold" color="text.secondary">
+                  📥 Export Options
+                </Typography>
+              </Box>
+              <MenuItem
+                onClick={handleExportExcel}
+                sx={{
+                  py: 1.5,
+                  px: 2,
+                  '&:hover': { bgcolor: 'action.hover' }
+                }}
+              >
+                <ListItemIcon>
+                  <TableChart sx={{ color: '#10b981' }} />
+                </ListItemIcon>
+                <ListItemText
+                  primary={<Typography fontWeight="medium">Export to Excel</Typography>}
+                  secondary={
+                    <Typography variant="caption" color="text.secondary">
+                      Multi-sheet workbook with all data
+                    </Typography>
+                  }
+                />
+              </MenuItem>
+              <MenuItem
+                onClick={handleExportPDF}
+                sx={{
+                  py: 1.5,
+                  px: 2,
+                  '&:hover': { bgcolor: 'action.hover' }
+                }}
+              >
+                <ListItemIcon>
+                  <PictureAsPdf sx={{ color: '#ef4444' }} />
+                </ListItemIcon>
+                <ListItemText
+                  primary={<Typography fontWeight="medium">Export to PDF</Typography>}
+                  secondary={
+                    <Typography variant="caption" color="text.secondary">
+                      Formatted report with tables
+                    </Typography>
+                  }
+                />
+              </MenuItem>
+            </Menu>
+          </Box>
+        </Box>
 
-      {/* CSS for refresh animation */}
-      <style>
-        {`
+        {/* Main Metric Cards */}
+        <Grid container spacing={3} sx={{ mb: 4 }}>
+          <Grid item xs={12} sm={6} lg={3}>
+            <MetricCard
+              title="Total Revenue"
+              value={`₹${analytics.revenue.toLocaleString()}`}
+              subtitle={`${analytics.salesCount} completed sales`}
+              icon={TrendingUp}
+              gradient="linear-gradient(135deg, #10b981 0%, #059669 100%)"
+            />
+          </Grid>
+          <Grid item xs={12} sm={6} lg={3}>
+            <MetricCard
+              title="Total Expenses"
+              value={`₹${analytics.expenses.toLocaleString()}`}
+              subtitle="Including stock purchases"
+              icon={Receipt}
+              gradient="linear-gradient(135deg, #ef4444 0%, #dc2626 100%)"
+            />
+          </Grid>
+          <Grid item xs={12} sm={6} lg={3}>
+            <MetricCard
+              title="Net Profit"
+              value={`₹${analytics.profit.toLocaleString()}`}
+              subtitle={`${analytics.profitMargin.toFixed(1)}% margin`}
+              icon={AccountBalance}
+              gradient={analytics.profit >= 0
+                ? "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)"
+                : "linear-gradient(135deg, #f97316 0%, #ea580c 100%)"
+              }
+            />
+          </Grid>
+        </Grid>
+
+        {/* Quick Stats Row */}
+        <Grid container spacing={2} sx={{ mb: 4 }}>
+          <Grid item xs={12} sm={4}>
+            <SmallStatCard
+              title="Paid Invoices"
+              value={analytics.paymentStatusCounts?.paid || 0}
+              color="#10b981"
+              icon={CheckCircle}
+            />
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <ClickableStatCard
+              title="Pending Sales"
+              value={analytics.pendingSalesCount}
+              color="#f59e0b"
+              icon={Schedule}
+              onClick={() => navigate('/sales', { state: { tab: 1 } })}
+            />
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <SmallStatCard
+              title="Unpaid Invoices"
+              value={analytics.paymentStatusCounts?.unpaid || 0}
+              color="#ef4444"
+              icon={Payment}
+            />
+          </Grid>
+        </Grid>
+
+        {/* Sales Trend Chart */}
+        <Paper sx={{ p: 3, mb: 4, borderRadius: 3, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
+          <Typography variant="h6" fontWeight="bold" gutterBottom>
+            📈 Daily Sales Trend
+          </Typography>
+          <Typography variant="body2" color="text.secondary" mb={3}>
+            Revenue performance throughout the month
+          </Typography>
+          <Box height={300}>
+            <Line data={salesTrendData} options={chartOptions} />
+          </Box>
+        </Paper>
+
+        {/* Charts Row */}
+        <Grid container spacing={3} sx={{ mb: 4 }}>
+          {/* Revenue vs Expenses */}
+          <Grid item xs={12} md={6}>
+            <Paper sx={{ p: 3, borderRadius: 3, height: '100%', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
+              <Typography variant="h6" fontWeight="bold" gutterBottom>
+                💰 Revenue vs Expenses
+              </Typography>
+              <Box height={280}>
+                <Bar data={revenueVsExpensesData} options={chartOptions} />
+              </Box>
+            </Paper>
+          </Grid>
+
+          {/* Payment Status */}
+          <Grid item xs={12} md={6}>
+            <Paper sx={{ p: 3, borderRadius: 3, height: '100%', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
+              <Typography variant="h6" fontWeight="bold" gutterBottom>
+                💳 Payment Status
+              </Typography>
+              {(analytics.paymentStatusCounts?.paid || 0) +
+                (analytics.paymentStatusCounts?.partial || 0) +
+                (analytics.paymentStatusCounts?.unpaid || 0) > 0 ? (
+                <Box height={280} display="flex" justifyContent="center">
+                  <Doughnut data={paymentStatusData} options={doughnutOptions} />
+                </Box>
+              ) : (
+                <Box height={280} display="flex" alignItems="center" justifyContent="center">
+                  <Typography color="text.secondary">No sales data for this month</Typography>
+                </Box>
+              )}
+            </Paper>
+          </Grid>
+        </Grid>
+
+        {/* Second Charts Row */}
+        <Grid container spacing={3} sx={{ mb: 4 }}>
+          {/* Expense Breakdown */}
+          <Grid item xs={12} md={6}>
+            <Paper sx={{ p: 3, borderRadius: 3, height: '100%', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
+              <Typography variant="h6" fontWeight="bold" gutterBottom>
+                📋 Expense Breakdown
+              </Typography>
+              {Object.keys(analytics.expenseBreakdown).length > 0 ? (
+                <Box height={280} display="flex" justifyContent="center">
+                  <Pie data={expenseBreakdownData} options={doughnutOptions} />
+                </Box>
+              ) : (
+                <Box height={280} display="flex" alignItems="center" justifyContent="center">
+                  <Typography color="text.secondary">No expenses recorded this month</Typography>
+                </Box>
+              )}
+            </Paper>
+          </Grid>
+
+          {/* Stock by Category */}
+          <Grid item xs={12} md={6}>
+            <Paper sx={{ p: 3, borderRadius: 3, height: '100%', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
+              <Typography variant="h6" fontWeight="bold" gutterBottom>
+                📦 Stock Levels by Category
+              </Typography>
+              {Object.keys(analytics.stockByTag || {}).length > 0 ? (
+                <Box height={280}>
+                  <Bar data={stockByTagData} options={chartOptions} />
+                </Box>
+              ) : (
+                <Box height={280} display="flex" alignItems="center" justifyContent="center">
+                  <Typography color="text.secondary">No stock data available</Typography>
+                </Box>
+              )}
+            </Paper>
+          </Grid>
+        </Grid>
+
+        {/* Top Products Table */}
+        <Paper sx={{ p: 3, borderRadius: 3, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
+          <Typography variant="h6" fontWeight="bold" gutterBottom>
+            🏆 Top Selling Products
+          </Typography>
+          <Typography variant="body2" color="text.secondary" mb={3}>
+            Best performing products by revenue
+          </Typography>
+          {analytics.topProducts.length > 0 ? (
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Rank</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Product</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 'bold' }}>Units Sold</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 'bold' }}>Revenue</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', width: '30%' }}>Performance</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {analytics.topProducts.map((product, index) => (
+                    <TableRow key={index} hover>
+                      <TableCell>
+                        <Chip
+                          label={`#${index + 1}`}
+                          size="small"
+                          sx={{
+                            bgcolor: index === 0 ? '#fef3c7' : index === 1 ? '#e5e7eb' : index === 2 ? '#fed7aa' : '#f1f5f9',
+                            color: index === 0 ? '#92400e' : index === 1 ? '#374151' : index === 2 ? '#9a3412' : '#475569',
+                            fontWeight: 'bold'
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2" fontWeight="medium">
+                          {product.name}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {product.code}
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="right">
+                        <Chip label={product.quantity} size="small" variant="outlined" />
+                      </TableCell>
+                      <TableCell align="right">
+                        <Typography variant="body2" fontWeight="bold" color="success.main">
+                          ₹{product.revenue.toLocaleString()}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Box display="flex" alignItems="center" gap={1}>
+                          <LinearProgress
+                            variant="determinate"
+                            value={product.percentage}
+                            sx={{
+                              flex: 1,
+                              height: 8,
+                              borderRadius: 4,
+                              bgcolor: 'rgba(99, 102, 241, 0.1)',
+                              '& .MuiLinearProgress-bar': {
+                                borderRadius: 4,
+                                background: 'linear-gradient(90deg, #6366f1, #8b5cf6)'
+                              }
+                            }}
+                          />
+                          <Typography variant="caption" color="text.secondary" sx={{ minWidth: 40 }}>
+                            {product.percentage.toFixed(0)}%
+                          </Typography>
+                        </Box>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          ) : (
+            <Box py={4} textAlign="center">
+              <Typography color="text.secondary">
+                No sales data available. Complete some sales to see top products!
+              </Typography>
+            </Box>
+          )}
+        </Paper>
+
+        {/* CSS for refresh animation */}
+        <style>
+          {`
                     @keyframes spin {
                         from { transform: rotate(0deg); }
                         to { transform: rotate(360deg); }
                     }
                 `}
-      </style>
+        </style>
 
-      {/* Export notification snackbar */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={4000}
-        onClose={handleSnackbarClose}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-      >
-        <Alert
+        {/* Export notification snackbar */}
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={4000}
           onClose={handleSnackbarClose}
-          severity={snackbar.severity}
-          variant="filled"
-          sx={{
-            width: '100%',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
-          }}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
+          <Alert
+            onClose={handleSnackbarClose}
+            severity={snackbar.severity}
+            variant="filled"
+            sx={{
+              width: '100%',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+            }}
+          >
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
+      </Paper>
     </Box >
   );
 };

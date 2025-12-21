@@ -973,249 +973,192 @@ const StockIntakePage = () => {
     );
 
     return (
-        <Box p={3}>
-            <Typography variant="h4" component="h1" gutterBottom sx={{ color: 'primary.main' }}>
-                Stock Intake
-            </Typography>
+        <Box p={3} sx={{ bgcolor: 'background.default', minHeight: '100vh', borderRadius: 4 }}>
+            <Paper sx={{ p: 3, borderRadius: 4, bgcolor: 'background.paper' }}>
+                <Typography variant="h4" component="h1" gutterBottom sx={{ color: 'primary.main' }}>
+                    Stock Intake
+                </Typography>
 
-            <Paper elevation={2} sx={{ mb: 3 }}>
-                <Tabs value={activeTab} onChange={(e, val) => setActiveTab(val)}>
-                    <Tab label="Record Stock Intake" />
-                    <Tab label="Pending Intakes" />
-                    {canViewFinancials && <Tab label="Intake History" />}
-                </Tabs>
-            </Paper>
-            <Box p={3}>
-                {activeTab === 0 && renderRecordForm()}
-                {activeTab === 1 && renderHistory()}
-                {canViewFinancials && activeTab === 2 && renderHistory()}
-            </Box>
+                <Paper elevation={2} sx={{ mb: 3 }}>
+                    <Tabs value={activeTab} onChange={(e, val) => setActiveTab(val)}>
+                        <Tab label="Record Stock Intake" />
+                        <Tab label="Pending Intakes" />
+                        {canViewFinancials && <Tab label="Intake History" />}
+                    </Tabs>
+                </Paper>
+                <Box p={3}>
+                    {activeTab === 0 && renderRecordForm()}
+                    {activeTab === 1 && renderHistory()}
+                    {canViewFinancials && activeTab === 2 && renderHistory()}
+                </Box>
 
-            {/* View Details Dialog */}
-            <Dialog open={detailDialog} onClose={() => setDetailDialog(false)} maxWidth="md" fullWidth>
-                <DialogTitle>Stock Intake Details</DialogTitle>
-                <DialogContent>
-                    {selectedIntake && (
-                        <Box>
-                            <Grid container spacing={2} sx={{ mb: 3, mt: 1 }}>
-                                <Grid item xs={6}>
-                                    <Typography variant="body2" color="text.secondary">Supplier</Typography>
-                                    <Typography variant="body1">{selectedIntake.supplier_name}</Typography>
-                                </Grid>
-                                <Grid item xs={6}>
-                                    <Typography variant="body2" color="text.secondary">Date</Typography>
-                                    <Typography variant="body1">{new Date(selectedIntake.intake_date).toLocaleDateString()}</Typography>
-                                </Grid>
-                                <Grid item xs={6}>
-                                    <Typography variant="body2" color="text.secondary">Status</Typography>
-                                    <Chip
-                                        label={selectedIntake.status}
-                                        color={selectedIntake.status === 'completed' ? 'success' : 'warning'}
-                                        size="small"
-                                    />
-                                </Grid>
-                                <Grid item xs={6}>
-                                    <Typography variant="body2" color="text.secondary">Created By</Typography>
-                                    <Typography variant="body1">{selectedIntake.created_by}</Typography>
-                                </Grid>
-                                {selectedIntake.notes && (
-                                    <Grid item xs={12}>
-                                        <Typography variant="body2" color="text.secondary">Notes</Typography>
-                                        <Typography variant="body1">{selectedIntake.notes}</Typography>
+                {/* View Details Dialog */}
+                <Dialog open={detailDialog} onClose={() => setDetailDialog(false)} maxWidth="md" fullWidth>
+                    <DialogTitle>Stock Intake Details</DialogTitle>
+                    <DialogContent>
+                        {selectedIntake && (
+                            <Box>
+                                <Grid container spacing={2} sx={{ mb: 3, mt: 1 }}>
+                                    <Grid item xs={6}>
+                                        <Typography variant="body2" color="text.secondary">Supplier</Typography>
+                                        <Typography variant="body1">{selectedIntake.supplier_name}</Typography>
                                     </Grid>
-                                )}
-                            </Grid>
-
-                            <Typography variant="subtitle1" gutterBottom sx={{ mt: 2 }}>
-                                Items
-                            </Typography>
-                            <TableContainer component={Paper} variant="outlined">
-                                <Table size="small">
-                                    <TableHead>
-                                        <TableRow>
-                                            <TableCell>Product</TableCell>
-                                            <TableCell align="right">Quantity</TableCell>
-                                            <TableCell align="right">Purchase Price</TableCell>
-                                            <TableCell align="right">Total</TableCell>
-                                        </TableRow>
-                                    </TableHead>
-                                    <TableBody>
-                                        {selectedIntake.items.map((item) => (
-                                            <TableRow key={item.id}>
-                                                <TableCell>{item.product_code} - {item.product_name}</TableCell>
-                                                <TableCell align="right">{item.quantity}</TableCell>
-                                                <TableCell align="right">
-                                                    {item.purchase_price_per_unit != null
-                                                        ? `₹${item.purchase_price_per_unit.toFixed(2)}`
-                                                        : 'Not set'}
-                                                </TableCell>
-                                                <TableCell align="right">
-                                                    {item.total_cost != null
-                                                        ? `₹${item.total_cost.toFixed(2)}`
-                                                        : '-'}
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                        <TableRow>
-                                            <TableCell colSpan={3} align="right"><strong>Grand Total:</strong></TableCell>
-                                            <TableCell align="right">
-                                                <strong>₹{selectedIntake.total_cost.toFixed(2)}</strong>
-                                            </TableCell>
-                                        </TableRow>
-                                    </TableBody>
-                                </Table>
-                            </TableContainer>
-                        </Box>
-                    )}
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setDetailDialog(false)}>Close</Button>
-                </DialogActions>
-            </Dialog>
-
-            {/* Edit Pending Intake Dialog */}
-            <Dialog open={editDialog} onClose={() => setEditDialog(false)} maxWidth="lg" fullWidth>
-                <DialogTitle>Edit Pending Stock Intake</DialogTitle>
-                <DialogContent>
-                    {editingIntake && (
-                        <Box>
-                            {/* Intake Info */}
-                            <Grid container spacing={2} sx={{ mb: 3, mt: 1 }}>
-                                <Grid item xs={6}>
-                                    <Typography variant="body2" color="text.secondary">Supplier</Typography>
-                                    <Typography variant="body1">{editingIntake.supplier_name}</Typography>
+                                    <Grid item xs={6}>
+                                        <Typography variant="body2" color="text.secondary">Date</Typography>
+                                        <Typography variant="body1">{new Date(selectedIntake.intake_date).toLocaleDateString()}</Typography>
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <Typography variant="body2" color="text.secondary">Status</Typography>
+                                        <Chip
+                                            label={selectedIntake.status}
+                                            color={selectedIntake.status === 'completed' ? 'success' : 'warning'}
+                                            size="small"
+                                        />
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <Typography variant="body2" color="text.secondary">Created By</Typography>
+                                        <Typography variant="body1">{selectedIntake.created_by}</Typography>
+                                    </Grid>
+                                    {selectedIntake.notes && (
+                                        <Grid item xs={12}>
+                                            <Typography variant="body2" color="text.secondary">Notes</Typography>
+                                            <Typography variant="body1">{selectedIntake.notes}</Typography>
+                                        </Grid>
+                                    )}
                                 </Grid>
-                                <Grid item xs={6}>
-                                    <Typography variant="body2" color="text.secondary">Date</Typography>
-                                    <Typography variant="body1">{new Date(editingIntake.intake_date).toLocaleDateString()}</Typography>
-                                </Grid>
-                            </Grid>
 
-                            <Divider sx={{ my: 2 }} />
-
-                            {/* Add New Item Section */}
-                            <Typography variant="subtitle1" gutterBottom>Add New Item</Typography>
-                            <Grid container spacing={2} alignItems="flex-end" sx={{ mb: 3 }}>
-                                <Grid item xs={12} md={5}>
-                                    <Autocomplete
-                                        options={products}
-                                        getOptionLabel={(option) => option.name}
-                                        value={editCurrentProduct}
-                                        inputValue={editProductInputValue}
-                                        onInputChange={(e, newInputValue) => {
-                                            setEditProductInputValue(newInputValue);
-                                        }}
-                                        onChange={(e, newValue) => {
-                                            setEditCurrentProduct(newValue);
-                                            if (newValue) {
-                                                setEditProductInputValue(`${newValue.product_code} - ${newValue.name}`);
-                                            } else {
-                                                setEditProductInputValue('');
-                                            }
-                                        }}
-                                        renderInput={(params) => (
-                                            <TextField {...params} label="Select Product" placeholder="Search product" />
-                                        )}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} md={2}>
-                                    <TextField
-                                        fullWidth
-                                        type="number"
-                                        label="Quantity"
-                                        value={editQuantity}
-                                        onChange={(e) => setEditQuantity(parseInt(e.target.value) || 1)}
-                                        inputProps={{ min: 1 }}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} md={3}>
-                                    <TextField
-                                        fullWidth
-                                        type="number"
-                                        label="Purchase Price (Optional)"
-                                        value={editPrice}
-                                        onChange={(e) => setEditPrice(e.target.value)}
-                                        inputProps={{ min: 0, step: 0.01 }}
-                                        placeholder="Enter price"
-                                    />
-                                </Grid>
-                                <Grid item xs={12} md={2}>
-                                    <Button
-                                        fullWidth
-                                        variant="outlined"
-                                        startIcon={<Add />}
-                                        onClick={handleEditAddItem}
-                                        disabled={!editCurrentProduct}
-                                    >
-                                        Add Item
-                                    </Button>
-                                </Grid>
-                            </Grid>
-
-                            <Divider sx={{ my: 2 }} />
-
-                            {/* Existing Items */}
-                            <Typography variant="subtitle1" gutterBottom>Existing Items</Typography>
-                            {editItems.length > 0 ? (
-                                <TableContainer sx={{ mb: 3 }}>
+                                <Typography variant="subtitle1" gutterBottom sx={{ mt: 2 }}>
+                                    Items
+                                </Typography>
+                                <TableContainer component={Paper} variant="outlined">
                                     <Table size="small">
                                         <TableHead>
                                             <TableRow>
                                                 <TableCell>Product</TableCell>
                                                 <TableCell align="right">Quantity</TableCell>
                                                 <TableCell align="right">Purchase Price</TableCell>
-                                                <TableCell align="right">Actions</TableCell>
+                                                <TableCell align="right">Total</TableCell>
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
-                                            {editItems.map((item) => (
+                                            {selectedIntake.items.map((item) => (
                                                 <TableRow key={item.id}>
-                                                    <TableCell>{item.product_name}</TableCell>
+                                                    <TableCell>{item.product_code} - {item.product_name}</TableCell>
+                                                    <TableCell align="right">{item.quantity}</TableCell>
                                                     <TableCell align="right">
-                                                        <TextField
-                                                            type="number"
-                                                            size="small"
-                                                            value={item.quantity}
-                                                            onChange={(e) => handleEditItemQuantity(item.id, e.target.value)}
-                                                            inputProps={{ min: 1 }}
-                                                            sx={{ width: 100 }}
-                                                        />
+                                                        {item.purchase_price_per_unit != null
+                                                            ? `₹${item.purchase_price_per_unit.toFixed(2)}`
+                                                            : 'Not set'}
                                                     </TableCell>
                                                     <TableCell align="right">
-                                                        <TextField
-                                                            type="number"
-                                                            size="small"
-                                                            value={item.purchase_price_per_unit}
-                                                            onChange={(e) => handleEditItemPrice(item.id, e.target.value)}
-                                                            inputProps={{ min: 0, step: 0.01 }}
-                                                            placeholder="Enter price"
-                                                            sx={{ width: 150 }}
-                                                        />
-                                                    </TableCell>
-                                                    <TableCell align="right">
-                                                        <IconButton
-                                                            size="small"
-                                                            color="error"
-                                                            onClick={() => handleEditDeleteItem(item.id)}
-                                                        >
-                                                            <Delete />
-                                                        </IconButton>
+                                                        {item.total_cost != null
+                                                            ? `₹${item.total_cost.toFixed(2)}`
+                                                            : '-'}
                                                     </TableCell>
                                                 </TableRow>
                                             ))}
+                                            <TableRow>
+                                                <TableCell colSpan={3} align="right"><strong>Grand Total:</strong></TableCell>
+                                                <TableCell align="right">
+                                                    <strong>₹{selectedIntake.total_cost.toFixed(2)}</strong>
+                                                </TableCell>
+                                            </TableRow>
                                         </TableBody>
                                     </Table>
                                 </TableContainer>
-                            ) : (
-                                <Alert severity="warning" sx={{ mb: 3 }}>No existing items</Alert>
-                            )}
+                            </Box>
+                        )}
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => setDetailDialog(false)}>Close</Button>
+                    </DialogActions>
+                </Dialog>
 
-                            {/* New Items */}
-                            {newEditItems.length > 0 && (
-                                <>
-                                    <Divider sx={{ my: 2 }} />
-                                    <Typography variant="subtitle1" gutterBottom>Newly Added Items</Typography>
-                                    <TableContainer>
+                {/* Edit Pending Intake Dialog */}
+                <Dialog open={editDialog} onClose={() => setEditDialog(false)} maxWidth="lg" fullWidth>
+                    <DialogTitle>Edit Pending Stock Intake</DialogTitle>
+                    <DialogContent>
+                        {editingIntake && (
+                            <Box>
+                                {/* Intake Info */}
+                                <Grid container spacing={2} sx={{ mb: 3, mt: 1 }}>
+                                    <Grid item xs={6}>
+                                        <Typography variant="body2" color="text.secondary">Supplier</Typography>
+                                        <Typography variant="body1">{editingIntake.supplier_name}</Typography>
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <Typography variant="body2" color="text.secondary">Date</Typography>
+                                        <Typography variant="body1">{new Date(editingIntake.intake_date).toLocaleDateString()}</Typography>
+                                    </Grid>
+                                </Grid>
+
+                                <Divider sx={{ my: 2 }} />
+
+                                {/* Add New Item Section */}
+                                <Typography variant="subtitle1" gutterBottom>Add New Item</Typography>
+                                <Grid container spacing={2} alignItems="flex-end" sx={{ mb: 3 }}>
+                                    <Grid item xs={12} md={5}>
+                                        <Autocomplete
+                                            options={products}
+                                            getOptionLabel={(option) => option.name}
+                                            value={editCurrentProduct}
+                                            inputValue={editProductInputValue}
+                                            onInputChange={(e, newInputValue) => {
+                                                setEditProductInputValue(newInputValue);
+                                            }}
+                                            onChange={(e, newValue) => {
+                                                setEditCurrentProduct(newValue);
+                                                if (newValue) {
+                                                    setEditProductInputValue(`${newValue.product_code} - ${newValue.name}`);
+                                                } else {
+                                                    setEditProductInputValue('');
+                                                }
+                                            }}
+                                            renderInput={(params) => (
+                                                <TextField {...params} label="Select Product" placeholder="Search product" />
+                                            )}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} md={2}>
+                                        <TextField
+                                            fullWidth
+                                            type="number"
+                                            label="Quantity"
+                                            value={editQuantity}
+                                            onChange={(e) => setEditQuantity(parseInt(e.target.value) || 1)}
+                                            inputProps={{ min: 1 }}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} md={3}>
+                                        <TextField
+                                            fullWidth
+                                            type="number"
+                                            label="Purchase Price (Optional)"
+                                            value={editPrice}
+                                            onChange={(e) => setEditPrice(e.target.value)}
+                                            inputProps={{ min: 0, step: 0.01 }}
+                                            placeholder="Enter price"
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} md={2}>
+                                        <Button
+                                            fullWidth
+                                            variant="outlined"
+                                            startIcon={<Add />}
+                                            onClick={handleEditAddItem}
+                                            disabled={!editCurrentProduct}
+                                        >
+                                            Add Item
+                                        </Button>
+                                    </Grid>
+                                </Grid>
+
+                                <Divider sx={{ my: 2 }} />
+
+                                {/* Existing Items */}
+                                <Typography variant="subtitle1" gutterBottom>Existing Items</Typography>
+                                {editItems.length > 0 ? (
+                                    <TableContainer sx={{ mb: 3 }}>
                                         <Table size="small">
                                             <TableHead>
                                                 <TableRow>
@@ -1226,18 +1169,35 @@ const StockIntakePage = () => {
                                                 </TableRow>
                                             </TableHead>
                                             <TableBody>
-                                                {newEditItems.map((item) => (
+                                                {editItems.map((item) => (
                                                     <TableRow key={item.id}>
                                                         <TableCell>{item.product_name}</TableCell>
-                                                        <TableCell align="right">{item.quantity}</TableCell>
                                                         <TableCell align="right">
-                                                            {item.purchase_price_per_unit ? `₹${parseFloat(item.purchase_price_per_unit).toFixed(2)}` : 'Not set'}
+                                                            <TextField
+                                                                type="number"
+                                                                size="small"
+                                                                value={item.quantity}
+                                                                onChange={(e) => handleEditItemQuantity(item.id, e.target.value)}
+                                                                inputProps={{ min: 1 }}
+                                                                sx={{ width: 100 }}
+                                                            />
+                                                        </TableCell>
+                                                        <TableCell align="right">
+                                                            <TextField
+                                                                type="number"
+                                                                size="small"
+                                                                value={item.purchase_price_per_unit}
+                                                                onChange={(e) => handleEditItemPrice(item.id, e.target.value)}
+                                                                inputProps={{ min: 0, step: 0.01 }}
+                                                                placeholder="Enter price"
+                                                                sx={{ width: 150 }}
+                                                            />
                                                         </TableCell>
                                                         <TableCell align="right">
                                                             <IconButton
                                                                 size="small"
                                                                 color="error"
-                                                                onClick={() => handleEditRemoveNewItem(item.id)}
+                                                                onClick={() => handleEditDeleteItem(item.id)}
                                                             >
                                                                 <Delete />
                                                             </IconButton>
@@ -1247,126 +1207,168 @@ const StockIntakePage = () => {
                                             </TableBody>
                                         </Table>
                                     </TableContainer>
-                                </>
-                            )}
-                        </Box>
-                    )}
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setEditDialog(false)}>Cancel</Button>
-                    <Button onClick={handleSaveEdit} variant="contained">Save Changes</Button>
-                </DialogActions>
-            </Dialog>
+                                ) : (
+                                    <Alert severity="warning" sx={{ mb: 3 }}>No existing items</Alert>
+                                )}
 
-            {/* New Product Dialog */}
-            <Dialog open={newProductDialog} onClose={() => setNewProductDialog(false)} maxWidth="md" fullWidth>
-                <DialogTitle>Add New Product</DialogTitle>
-                <DialogContent>
-                    <Grid container spacing={2} sx={{ mt: 1 }}>
-                        {/* Row 1: Product Name and Year */}
-                        <Grid item xs={12} sm={8}>
-                            <TextField
-                                fullWidth
-                                label="Product Name"
-                                value={newProductData.name}
-                                onChange={(e) => setNewProductData(prev => ({ ...prev, name: e.target.value }))}
-                                autoFocus
-                            />
-                        </Grid>
-                        <Grid item xs={12} sm={4}>
-                            <TextField
-                                fullWidth
-                                label="Year"
-                                value={newProductData.year}
-                                onChange={(e) => setNewProductData(prev => ({ ...prev, year: e.target.value }))}
-                                placeholder="e.g., 2020, 2018-2023"
-                            />
-                        </Grid>
+                                {/* New Items */}
+                                {newEditItems.length > 0 && (
+                                    <>
+                                        <Divider sx={{ my: 2 }} />
+                                        <Typography variant="subtitle1" gutterBottom>Newly Added Items</Typography>
+                                        <TableContainer>
+                                            <Table size="small">
+                                                <TableHead>
+                                                    <TableRow>
+                                                        <TableCell>Product</TableCell>
+                                                        <TableCell align="right">Quantity</TableCell>
+                                                        <TableCell align="right">Purchase Price</TableCell>
+                                                        <TableCell align="right">Actions</TableCell>
+                                                    </TableRow>
+                                                </TableHead>
+                                                <TableBody>
+                                                    {newEditItems.map((item) => (
+                                                        <TableRow key={item.id}>
+                                                            <TableCell>{item.product_name}</TableCell>
+                                                            <TableCell align="right">{item.quantity}</TableCell>
+                                                            <TableCell align="right">
+                                                                {item.purchase_price_per_unit ? `₹${parseFloat(item.purchase_price_per_unit).toFixed(2)}` : 'Not set'}
+                                                            </TableCell>
+                                                            <TableCell align="right">
+                                                                <IconButton
+                                                                    size="small"
+                                                                    color="error"
+                                                                    onClick={() => handleEditRemoveNewItem(item.id)}
+                                                                >
+                                                                    <Delete />
+                                                                </IconButton>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    ))}
+                                                </TableBody>
+                                            </Table>
+                                        </TableContainer>
+                                    </>
+                                )}
+                            </Box>
+                        )}
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => setEditDialog(false)}>Cancel</Button>
+                        <Button onClick={handleSaveEdit} variant="contained">Save Changes</Button>
+                    </DialogActions>
+                </Dialog>
 
-                        {/* Row 2: Category Dropdown */}
-                        <Grid item xs={12} sm={6}>
-                            <TextField
-                                select
-                                fullWidth
-                                label="Category"
-                                value={newProductData.category}
-                                onChange={(e) => setNewProductData(prev => ({ ...prev, category: e.target.value }))}
-                            >
-                                <MenuItem value="sunroof">Sunroof</MenuItem>
-                                <MenuItem value="windshield">Windshield</MenuItem>
-                                <MenuItem value="door_glass">Door Glass</MenuItem>
-                                <MenuItem value="rear_glass">Rear Glass</MenuItem>
-                                <MenuItem value="quarter_glass">Quarter Glass</MenuItem>
-                                <MenuItem value="strip">Strip</MenuItem>
-                                <MenuItem value="frame">Frame</MenuItem>
-                                <MenuItem value="middle">Middle</MenuItem>
-                                <MenuItem value="lami">Lami</MenuItem>
-                            </TextField>
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                            {/* Empty for spacing */}
-                        </Grid>
+                {/* New Product Dialog */}
+                <Dialog open={newProductDialog} onClose={() => setNewProductDialog(false)} maxWidth="md" fullWidth>
+                    <DialogTitle>Add New Product</DialogTitle>
+                    <DialogContent>
+                        <Grid container spacing={2} sx={{ mt: 1 }}>
+                            {/* Row 1: Product Name and Year */}
+                            <Grid item xs={12} sm={8}>
+                                <TextField
+                                    fullWidth
+                                    label="Product Name"
+                                    value={newProductData.name}
+                                    onChange={(e) => setNewProductData(prev => ({ ...prev, name: e.target.value }))}
+                                    autoFocus
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={4}>
+                                <TextField
+                                    fullWidth
+                                    label="Year"
+                                    value={newProductData.year}
+                                    onChange={(e) => setNewProductData(prev => ({ ...prev, year: e.target.value }))}
+                                    placeholder="e.g., 2020, 2018-2023"
+                                />
+                            </Grid>
 
-                        <Grid item xs={12}>
-                            <TextField
-                                fullWidth
-                                multiline
-                                rows={2}
-                                label="Description"
-                                value={newProductData.description}
-                                onChange={(e) => setNewProductData(prev => ({ ...prev, description: e.target.value }))}
-                            />
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <TextField
-                                fullWidth
-                                type="number"
-                                label="Length (inches)"
-                                value={newProductData.length_mm}
-                                onChange={(e) => setNewProductData(prev => ({ ...prev, length_mm: e.target.value }))}
-                            />
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <TextField
-                                fullWidth
-                                type="number"
-                                label="Width (inches)"
-                                value={newProductData.width_mm}
-                                onChange={(e) => setNewProductData(prev => ({ ...prev, width_mm: e.target.value }))}
-                            />
-                        </Grid>
+                            {/* Row 2: Category Dropdown */}
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    select
+                                    fullWidth
+                                    label="Category"
+                                    value={newProductData.category}
+                                    onChange={(e) => setNewProductData(prev => ({ ...prev, category: e.target.value }))}
+                                >
+                                    <MenuItem value="sunroof">Sunroof</MenuItem>
+                                    <MenuItem value="windshield">Windshield</MenuItem>
+                                    <MenuItem value="door_glass">Door Glass</MenuItem>
+                                    <MenuItem value="rear_glass">Rear Glass</MenuItem>
+                                    <MenuItem value="quarter_glass">Quarter Glass</MenuItem>
+                                    <MenuItem value="strip">Strip</MenuItem>
+                                    <MenuItem value="frame">Frame</MenuItem>
+                                    <MenuItem value="middle">Middle</MenuItem>
+                                    <MenuItem value="lami">Lami</MenuItem>
+                                </TextField>
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                {/* Empty for spacing */}
+                            </Grid>
 
-                        <Grid item xs={12} sm={6}>
-                            <TextField
-                                fullWidth
-                                type="number"
-                                label="Stock Quantity"
-                                value={newProductData.stock_quantity}
-                                onChange={(e) => setNewProductData(prev => ({ ...prev, stock_quantity: e.target.value }))}
-                            />
-                        </Grid>
-
-                        {user?.can_view_financials && (
+                            <Grid item xs={12}>
+                                <TextField
+                                    fullWidth
+                                    multiline
+                                    rows={2}
+                                    label="Description"
+                                    value={newProductData.description}
+                                    onChange={(e) => setNewProductData(prev => ({ ...prev, description: e.target.value }))}
+                                />
+                            </Grid>
                             <Grid item xs={12} sm={6}>
                                 <TextField
                                     fullWidth
                                     type="number"
-                                    label="Purchase Price"
-                                    value={newProductData.purchase_price}
-                                    onChange={(e) => setNewProductData(prev => ({ ...prev, purchase_price: e.target.value }))}
-                                    InputProps={{
-                                        startAdornment: <InputAdornment position="start">₹</InputAdornment>,
-                                    }}
+                                    label="Length (inches)"
+                                    value={newProductData.length_mm}
+                                    onChange={(e) => setNewProductData(prev => ({ ...prev, length_mm: e.target.value }))}
                                 />
                             </Grid>
-                        )}
-                    </Grid>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setNewProductDialog(false)}>Cancel</Button>
-                    <Button onClick={handleCreateNewProduct} variant="contained">Create Product</Button>
-                </DialogActions>
-            </Dialog>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    fullWidth
+                                    type="number"
+                                    label="Width (inches)"
+                                    value={newProductData.width_mm}
+                                    onChange={(e) => setNewProductData(prev => ({ ...prev, width_mm: e.target.value }))}
+                                />
+                            </Grid>
+
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    fullWidth
+                                    type="number"
+                                    label="Stock Quantity"
+                                    value={newProductData.stock_quantity}
+                                    onChange={(e) => setNewProductData(prev => ({ ...prev, stock_quantity: e.target.value }))}
+                                />
+                            </Grid>
+
+                            {user?.can_view_financials && (
+                                <Grid item xs={12} sm={6}>
+                                    <TextField
+                                        fullWidth
+                                        type="number"
+                                        label="Purchase Price"
+                                        value={newProductData.purchase_price}
+                                        onChange={(e) => setNewProductData(prev => ({ ...prev, purchase_price: e.target.value }))}
+                                        InputProps={{
+                                            startAdornment: <InputAdornment position="start">₹</InputAdornment>,
+                                        }}
+                                    />
+                                </Grid>
+                            )}
+                        </Grid>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => setNewProductDialog(false)}>Cancel</Button>
+                        <Button onClick={handleCreateNewProduct} variant="contained">Create Product</Button>
+                    </DialogActions>
+                </Dialog>
+            </Paper>
         </Box>
     );
 };

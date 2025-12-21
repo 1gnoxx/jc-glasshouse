@@ -254,276 +254,278 @@ const InventoryPage = () => {
     }
 
     return (
-        <Box sx={{ p: { xs: 0, sm: 1 } }}>
-            {/* Header */}
-            <Box
-                display="flex"
-                flexDirection={{ xs: 'column', sm: 'row' }}
-                justifyContent="space-between"
-                alignItems={{ xs: 'stretch', sm: 'center' }}
-                gap={2}
-                mb={3}
-            >
-                <Typography variant="h5" sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' }, color: 'primary.main' }}>
-                    <Inventory2 sx={{ mr: 1, verticalAlign: 'middle', fontSize: { xs: 20, sm: 24 } }} />
-                    Inventory
-                </Typography>
-                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                    <Button
-                        variant="outlined"
-                        startIcon={<Refresh />}
-                        onClick={fetchProducts}
-                        sx={{ flex: { xs: 1, sm: 'none' } }}
-                    >
-                        Refresh
-                    </Button>
-                    <Button
-                        variant="contained"
-                        startIcon={<Add />}
-                        onClick={handleAddProduct}
-                        sx={{ flex: { xs: 1, sm: 'none' } }}
-                    >
-                        Add Product
-                    </Button>
-                </Box>
-            </Box>
-
-            {error && (
-                <Alert severity="error" sx={{ mb: 2 }}>
-                    {error}
-                </Alert>
-            )}
-
-            {/* Filters */}
-            <Paper sx={{ p: 2, mb: 3 }}>
-                <Grid container spacing={2} alignItems="center">
-                    <Grid item xs={12} md={4}>
-                        <TextField
-                            fullWidth
-                            placeholder="Search products..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <Search />
-                                    </InputAdornment>
-                                ),
-                            }}
-                        />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
-                        <FormControl fullWidth>
-                            <InputLabel>Tags</InputLabel>
-                            <Select
-                                multiple
-                                value={tagFilter}
-                                label="Tags"
-                                onChange={(e) => setTagFilter(e.target.value)}
-                                renderValue={(selected) => (
-                                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                                        {selected.map((value) => (
-                                            <Chip
-                                                key={value}
-                                                label={value.replace('_', ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ')}
-                                                size="small"
-                                            />
-                                        ))}
-                                    </Box>
-                                )}
-                            >
-                                {tags.map((tag) => (
-                                    <MenuItem key={tag} value={tag}>
-                                        {tag.replace('_', ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ')}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
-                        <FormControl fullWidth>
-                            <InputLabel>Stock Status</InputLabel>
-                            <Select
-                                value={stockFilter}
-                                label="Stock Status"
-                                onChange={(e) => setStockFilter(e.target.value)}
-                            >
-                                <MenuItem value="">All Stock</MenuItem>
-                                <MenuItem value="in_stock">In Stock</MenuItem>
-                                <MenuItem value="out_of_stock">Out of Stock</MenuItem>
-                            </Select>
-                        </FormControl>
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={2}>
+        <Box p={3} sx={{ bgcolor: 'background.default', minHeight: '100vh', borderRadius: 4 }}>
+            <Paper sx={{ p: 3, borderRadius: 4, bgcolor: 'background.paper' }}>
+                {/* Header */}
+                <Box
+                    display="flex"
+                    flexDirection={{ xs: 'column', sm: 'row' }}
+                    justifyContent="space-between"
+                    alignItems={{ xs: 'stretch', sm: 'center' }}
+                    gap={2}
+                    mb={3}
+                >
+                    <Typography variant="h5" sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' }, color: 'primary.main' }}>
+                        <Inventory2 sx={{ mr: 1, verticalAlign: 'middle', fontSize: { xs: 20, sm: 24 } }} />
+                        Inventory
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                         <Button
-                            fullWidth
                             variant="outlined"
-                            startIcon={<FilterList />}
-                            onClick={() => {
-                                setSearchTerm('');
-                                setTagFilter([]);  // Reset to empty array
-                                setStockFilter('');
-                            }}
+                            startIcon={<Refresh />}
+                            onClick={fetchProducts}
+                            sx={{ flex: { xs: 1, sm: 'none' } }}
                         >
-                            Clear Filters
+                            Refresh
                         </Button>
-                    </Grid>
-                </Grid>
-            </Paper>
+                        <Button
+                            variant="contained"
+                            startIcon={<Add />}
+                            onClick={handleAddProduct}
+                            sx={{ flex: { xs: 1, sm: 'none' } }}
+                        >
+                            Add Product
+                        </Button>
+                    </Box>
+                </Box>
 
-            {/* Products Table */}
-            <Paper sx={{ overflow: 'hidden' }}>
-                <TableContainer sx={{ maxWidth: '100%', overflowX: 'auto' }}>
-                    <Table>
-                        <TableHead>
-                            <TableRow>
-                                {headCells.map((headCell) => (
-                                    <TableCell
-                                        key={headCell.id}
-                                        align={headCell.align}
-                                        sortDirection={orderBy === headCell.id ? order : false}
-                                    >
-                                        {!headCell.disableSort ? (
-                                            <TableSortLabel
-                                                active={orderBy === headCell.id}
-                                                direction={orderBy === headCell.id ? order : 'asc'}
-                                                onClick={() => handleRequestSort(headCell.id)}
-                                            >
+                {error && (
+                    <Alert severity="error" sx={{ mb: 2 }}>
+                        {error}
+                    </Alert>
+                )}
+
+                {/* Filters */}
+                <Paper sx={{ p: 2, mb: 3 }}>
+                    <Grid container spacing={2} alignItems="center">
+                        <Grid item xs={12} md={4}>
+                            <TextField
+                                fullWidth
+                                placeholder="Search products..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <Search />
+                                        </InputAdornment>
+                                    ),
+                                }}
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6} md={3}>
+                            <FormControl fullWidth>
+                                <InputLabel>Tags</InputLabel>
+                                <Select
+                                    multiple
+                                    value={tagFilter}
+                                    label="Tags"
+                                    onChange={(e) => setTagFilter(e.target.value)}
+                                    renderValue={(selected) => (
+                                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                            {selected.map((value) => (
+                                                <Chip
+                                                    key={value}
+                                                    label={value.replace('_', ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ')}
+                                                    size="small"
+                                                />
+                                            ))}
+                                        </Box>
+                                    )}
+                                >
+                                    {tags.map((tag) => (
+                                        <MenuItem key={tag} value={tag}>
+                                            {tag.replace('_', ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ')}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                        </Grid>
+                        <Grid item xs={12} sm={6} md={3}>
+                            <FormControl fullWidth>
+                                <InputLabel>Stock Status</InputLabel>
+                                <Select
+                                    value={stockFilter}
+                                    label="Stock Status"
+                                    onChange={(e) => setStockFilter(e.target.value)}
+                                >
+                                    <MenuItem value="">All Stock</MenuItem>
+                                    <MenuItem value="in_stock">In Stock</MenuItem>
+                                    <MenuItem value="out_of_stock">Out of Stock</MenuItem>
+                                </Select>
+                            </FormControl>
+                        </Grid>
+                        <Grid item xs={12} sm={6} md={2}>
+                            <Button
+                                fullWidth
+                                variant="outlined"
+                                startIcon={<FilterList />}
+                                onClick={() => {
+                                    setSearchTerm('');
+                                    setTagFilter([]);  // Reset to empty array
+                                    setStockFilter('');
+                                }}
+                            >
+                                Clear Filters
+                            </Button>
+                        </Grid>
+                    </Grid>
+                </Paper>
+
+                {/* Products Table */}
+                <Paper sx={{ overflow: 'hidden' }}>
+                    <TableContainer sx={{ maxWidth: '100%', overflowX: 'auto' }}>
+                        <Table>
+                            <TableHead>
+                                <TableRow>
+                                    {headCells.map((headCell) => (
+                                        <TableCell
+                                            key={headCell.id}
+                                            align={headCell.align}
+                                            sortDirection={orderBy === headCell.id ? order : false}
+                                        >
+                                            {!headCell.disableSort ? (
+                                                <TableSortLabel
+                                                    active={orderBy === headCell.id}
+                                                    direction={orderBy === headCell.id ? order : 'asc'}
+                                                    onClick={() => handleRequestSort(headCell.id)}
+                                                >
+                                                    <strong>{headCell.label}</strong>
+                                                </TableSortLabel>
+                                            ) : (
                                                 <strong>{headCell.label}</strong>
-                                            </TableSortLabel>
-                                        ) : (
-                                            <strong>{headCell.label}</strong>
-                                        )}
-                                    </TableCell>
-                                ))}
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {stableSort(filteredProducts, getComparator(order, orderBy))
-                                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                .map((product) => (
-                                    <TableRow key={product.id} hover>
-                                        <TableCell>
-                                            <Typography variant="body2">{product.name}</Typography>
-                                            {product.compatible_vehicles && (
-                                                <Typography variant="caption" color="text.secondary">
-                                                    {product.compatible_vehicles}
-                                                </Typography>
                                             )}
                                         </TableCell>
-                                        <TableCell>
-                                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                                                {(product.tags && product.tags.length > 0) ? (
-                                                    product.tags.map((tag, idx) => (
+                                    ))}
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {stableSort(filteredProducts, getComparator(order, orderBy))
+                                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                    .map((product) => (
+                                        <TableRow key={product.id} hover>
+                                            <TableCell>
+                                                <Typography variant="body2">{product.name}</Typography>
+                                                {product.compatible_vehicles && (
+                                                    <Typography variant="caption" color="text.secondary">
+                                                        {product.compatible_vehicles}
+                                                    </Typography>
+                                                )}
+                                            </TableCell>
+                                            <TableCell>
+                                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                                    {(product.tags && product.tags.length > 0) ? (
+                                                        product.tags.map((tag, idx) => (
+                                                            <Chip
+                                                                key={idx}
+                                                                label={tag.replace('_', ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ')}
+                                                                size="small"
+                                                                variant="outlined"
+                                                            />
+                                                        ))
+                                                    ) : (
                                                         <Chip
-                                                            key={idx}
-                                                            label={tag.replace('_', ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ')}
+                                                            label={product.category ? product.category.replace('_', ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ') : 'No tags'}
                                                             size="small"
                                                             variant="outlined"
                                                         />
-                                                    ))
-                                                ) : (
-                                                    <Chip
-                                                        label={product.category ? product.category.replace('_', ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ') : 'No tags'}
+                                                    )}
+                                                </Box>
+                                            </TableCell>
+                                            <TableCell align="center">
+                                                {product.length_mm || 'N/A'}
+                                            </TableCell>
+                                            <TableCell align="center">
+                                                {product.width_mm || 'N/A'}
+                                            </TableCell>
+                                            <TableCell align="center">
+                                                <Typography
+                                                    variant="body2"
+                                                    fontWeight="bold"
+                                                    color={product.stock_quantity === 0 ? 'error' : 'inherit'}
+                                                >
+                                                    {product.stock_quantity}
+                                                </Typography>
+                                            </TableCell>
+                                            {canViewFinancials && (
+                                                <TableCell align="right">
+                                                    ₹{product.purchase_price?.toLocaleString() || 'N/A'}
+                                                </TableCell>
+                                            )}
+                                            <TableCell align="center">
+                                                <Tooltip title="Edit">
+                                                    <IconButton
                                                         size="small"
-                                                        variant="outlined"
-                                                    />
-                                                )}
-                                            </Box>
-                                        </TableCell>
-                                        <TableCell align="center">
-                                            {product.length_mm || 'N/A'}
-                                        </TableCell>
-                                        <TableCell align="center">
-                                            {product.width_mm || 'N/A'}
-                                        </TableCell>
-                                        <TableCell align="center">
-                                            <Typography
-                                                variant="body2"
-                                                fontWeight="bold"
-                                                color={product.stock_quantity === 0 ? 'error' : 'inherit'}
-                                            >
-                                                {product.stock_quantity}
+                                                        onClick={() => handleEditProduct(product)}
+                                                        color="primary"
+                                                    >
+                                                        <Edit />
+                                                    </IconButton>
+                                                </Tooltip>
+                                                <Tooltip title="Delete">
+                                                    <IconButton
+                                                        size="small"
+                                                        onClick={() => handleDeleteClick(product)}
+                                                        color="error"
+                                                    >
+                                                        <Delete />
+                                                    </IconButton>
+                                                </Tooltip>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                {filteredProducts.length === 0 && (
+                                    <TableRow>
+                                        <TableCell colSpan={canViewFinancials ? 8 : 7} align="center">
+                                            <Typography variant="body2" color="text.secondary" py={3}>
+                                                No products found
                                             </Typography>
                                         </TableCell>
-                                        {canViewFinancials && (
-                                            <TableCell align="right">
-                                                ₹{product.purchase_price?.toLocaleString() || 'N/A'}
-                                            </TableCell>
-                                        )}
-                                        <TableCell align="center">
-                                            <Tooltip title="Edit">
-                                                <IconButton
-                                                    size="small"
-                                                    onClick={() => handleEditProduct(product)}
-                                                    color="primary"
-                                                >
-                                                    <Edit />
-                                                </IconButton>
-                                            </Tooltip>
-                                            <Tooltip title="Delete">
-                                                <IconButton
-                                                    size="small"
-                                                    onClick={() => handleDeleteClick(product)}
-                                                    color="error"
-                                                >
-                                                    <Delete />
-                                                </IconButton>
-                                            </Tooltip>
-                                        </TableCell>
                                     </TableRow>
-                                ))}
-                            {filteredProducts.length === 0 && (
-                                <TableRow>
-                                    <TableCell colSpan={canViewFinancials ? 8 : 7} align="center">
-                                        <Typography variant="body2" color="text.secondary" py={3}>
-                                            No products found
-                                        </Typography>
-                                    </TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-                <TablePagination
-                    component="div"
-                    count={filteredProducts.length}
-                    page={page}
-                    onPageChange={handleChangePage}
-                    rowsPerPage={rowsPerPage}
-                    onRowsPerPageChange={handleChangeRowsPerPage}
-                    rowsPerPageOptions={[5, 10, 25, 50]}
+                                )}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                    <TablePagination
+                        component="div"
+                        count={filteredProducts.length}
+                        page={page}
+                        onPageChange={handleChangePage}
+                        rowsPerPage={rowsPerPage}
+                        onRowsPerPageChange={handleChangeRowsPerPage}
+                        rowsPerPageOptions={[5, 10, 25, 50]}
+                    />
+                </Paper>
+
+                {/* Add/Edit Product Dialog */}
+                <ProductDialog
+                    open={openDialog}
+                    onClose={handleDialogClose}
+                    onSave={handleSaveProduct}
+                    product={editingProduct}
+                    canViewFinancials={canViewFinancials}
+                    tags={tags}
                 />
+
+                {/* Delete Confirmation Dialog */}
+                <Dialog open={deleteConfirmOpen} onClose={() => setDeleteConfirmOpen(false)}>
+                    <DialogTitle>Confirm Delete</DialogTitle>
+                    <DialogContent>
+                        Are you sure you want to delete "{productToDelete?.name}"?
+                        {productToDelete && (
+                            <Alert severity="warning" sx={{ mt: 2 }}>
+                                This action cannot be undone. If this product has sales history, it will be deactivated instead of deleted.
+                            </Alert>
+                        )}
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => setDeleteConfirmOpen(false)}>Cancel</Button>
+                        <Button onClick={handleDeleteConfirm} color="error" variant="contained">
+                            Delete
+                        </Button>
+                    </DialogActions>
+                </Dialog>
             </Paper>
-
-            {/* Add/Edit Product Dialog */}
-            <ProductDialog
-                open={openDialog}
-                onClose={handleDialogClose}
-                onSave={handleSaveProduct}
-                product={editingProduct}
-                canViewFinancials={canViewFinancials}
-                tags={tags}
-            />
-
-            {/* Delete Confirmation Dialog */}
-            <Dialog open={deleteConfirmOpen} onClose={() => setDeleteConfirmOpen(false)}>
-                <DialogTitle>Confirm Delete</DialogTitle>
-                <DialogContent>
-                    Are you sure you want to delete "{productToDelete?.name}"?
-                    {productToDelete && (
-                        <Alert severity="warning" sx={{ mt: 2 }}>
-                            This action cannot be undone. If this product has sales history, it will be deactivated instead of deleted.
-                        </Alert>
-                    )}
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setDeleteConfirmOpen(false)}>Cancel</Button>
-                    <Button onClick={handleDeleteConfirm} color="error" variant="contained">
-                        Delete
-                    </Button>
-                </DialogActions>
-            </Dialog>
         </Box >
     );
 };

@@ -2005,39 +2005,41 @@ const SalesPage = () => {
     );
 
     return (
-        <Box p={3}>
-            <Typography variant="h4" gutterBottom sx={{ color: 'primary.main' }}>
-                <Receipt sx={{ verticalAlign: 'middle', mr: 1 }} />
-                Sales
-            </Typography>
+        <Box p={3} sx={{ bgcolor: 'background.default', minHeight: '100vh', borderRadius: 4 }}>
+            <Paper sx={{ p: 3, borderRadius: 4, bgcolor: 'background.paper' }}>
+                <Typography variant="h4" gutterBottom sx={{ color: 'primary.main' }}>
+                    <Receipt sx={{ verticalAlign: 'middle', mr: 1 }} />
+                    Sales
+                </Typography>
 
-            <Paper sx={{ mb: 3 }}>
-                <Tabs
-                    value={activeTab}
-                    onChange={(e, newValue) => setActiveTab(newValue)}
-                    indicatorColor="primary"
-                    textColor="primary"
-                >
-                    <Tab label="Create New Sale" icon={<Add />} iconPosition="start" />
-                    <Tab
-                        label={`Pending Sales (${pendingSales.length})`}
-                        icon={<HourglassEmpty />}
-                        iconPosition="start"
-                    />
-                    {canViewFinancials && <Tab label="Sales History" icon={<Receipt />} iconPosition="start" />}
-                </Tabs>
+                <Paper sx={{ mb: 3 }}>
+                    <Tabs
+                        value={activeTab}
+                        onChange={(e, newValue) => setActiveTab(newValue)}
+                        indicatorColor="primary"
+                        textColor="primary"
+                    >
+                        <Tab label="Create New Sale" icon={<Add />} iconPosition="start" />
+                        <Tab
+                            label={`Pending Sales (${pendingSales.length})`}
+                            icon={<HourglassEmpty />}
+                            iconPosition="start"
+                        />
+                        {canViewFinancials && <Tab label="Sales History" icon={<Receipt />} iconPosition="start" />}
+                    </Tabs>
+                </Paper>
+
+                {activeTab === 0 && renderNewSaleForm()}
+                {activeTab === 1 && renderPendingSales()}
+                {canViewFinancials && activeTab === 2 && renderSalesHistory()}
+
+                <Snackbar
+                    open={openSnackbar}
+                    autoHideDuration={2000}
+                    onClose={() => setOpenSnackbar(false)}
+                    message="Product added to cart"
+                />
             </Paper>
-
-            {activeTab === 0 && renderNewSaleForm()}
-            {activeTab === 1 && renderPendingSales()}
-            {canViewFinancials && activeTab === 2 && renderSalesHistory()}
-
-            <Snackbar
-                open={openSnackbar}
-                autoHideDuration={2000}
-                onClose={() => setOpenSnackbar(false)}
-                message="Product added to cart"
-            />
         </Box>
     );
 };

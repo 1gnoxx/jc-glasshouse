@@ -351,7 +351,7 @@ const Dashboard = () => {
           <IconButton
             onClick={handleRefresh}
             disabled={refreshing}
-            sx={{ bgcolor: 'white', boxShadow: 1 }}
+            sx={{ bgcolor: 'background.paper', boxShadow: 1, '&:hover': { bgcolor: 'action.hover' } }}
           >
             <Refresh sx={{ animation: refreshing ? 'spin 1s linear infinite' : 'none' }} />
           </IconButton>

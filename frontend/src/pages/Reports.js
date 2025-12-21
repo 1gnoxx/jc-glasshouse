@@ -920,7 +920,7 @@ const Reports = () => {
   }
 
   return (
-    <Box p={3} sx={{ bgcolor: '#f8fafc', minHeight: '100vh' }}>
+    <Box p={3} sx={{ bgcolor: 'background.default', minHeight: '100vh' }}>
       {/* Header */}
       <Box
         sx={{
@@ -933,7 +933,7 @@ const Reports = () => {
         }}
       >
         <Box>
-          <Typography variant="h4" fontWeight="bold" gutterBottom>
+          <Typography variant="h4" fontWeight="bold" gutterBottom sx={{ color: 'primary.main' }}>
             📊 Analytics Dashboard
           </Typography>
           <Typography variant="body2" color="text.secondary">
@@ -947,7 +947,7 @@ const Reports = () => {
             onChange={(e) => setSelectedMonth(e.target.value)}
             size="small"
             sx={{
-              bgcolor: 'white',
+              bgcolor: 'background.paper',
               borderRadius: 1,
               '& .MuiOutlinedInput-root': {
                 borderRadius: 2
@@ -958,7 +958,7 @@ const Reports = () => {
             <IconButton
               onClick={handleRefresh}
               disabled={refreshing}
-              sx={{ bgcolor: 'white', boxShadow: 1 }}
+              sx={{ bgcolor: 'background.paper', boxShadow: 1, '&:hover': { bgcolor: 'action.hover' } }}
             >
               <Refresh sx={{ animation: refreshing ? 'spin 1s linear infinite' : 'none' }} />
             </IconButton>

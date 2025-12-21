@@ -1,13 +1,11 @@
 import React from 'react';
 import { Routes, Route, Outlet } from 'react-router-dom';
-import { ThemeProvider } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
 
 import { AuthProvider } from './context/AuthContext';
 import { NotificationProvider } from './context/NotificationContext';
+import { ThemeContextProvider } from './context/ThemeContext';
 import PrivateRoute from './components/PrivateRoute';
 import Layout from './components/Layout';
-import { theme } from './theme';
 
 // Import Pages
 import Dashboard from './pages/Dashboard';
@@ -30,8 +28,7 @@ const ProtectedLayout = () => (
 
 function App() {
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
+    <ThemeContextProvider>
       <NotificationProvider>
         <AuthProvider>
           <Routes>
@@ -78,8 +75,9 @@ function App() {
           </Routes>
         </AuthProvider>
       </NotificationProvider>
-    </ThemeProvider>
+    </ThemeContextProvider>
   );
 }
 
 export default App;
+

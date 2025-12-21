@@ -35,9 +35,12 @@ import {
     Timeline as TimelineIcon,
     Menu as MenuIcon,
     Logout as LogoutIcon,
-    Timer as TimerIcon
+    Timer as TimerIcon,
+    LightMode as LightModeIcon,
+    DarkMode as DarkModeIcon
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
+import { useThemeMode } from '../context/ThemeContext';
 
 const drawerWidth = 240;
 
@@ -49,6 +52,7 @@ const Layout = ({ children }) => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
     const [mobileOpen, setMobileOpen] = React.useState(false);
+    const { mode, toggleTheme, isDark } = useThemeMode();
 
     const handleDrawerToggle = () => {
         setMobileOpen(!mobileOpen);
@@ -115,9 +119,17 @@ const Layout = ({ children }) => {
                         JC Glasshouse
                     </Typography>
                     <Box sx={{ flexGrow: 1 }} />
-                    <Typography variant="body2" sx={{ mr: 2, display: { xs: 'none', sm: 'block' } }}>
+                    <Typography variant="body2" sx={{ mr: 1, display: { xs: 'none', sm: 'block' } }}>
                         {user?.full_name || user?.username}
                     </Typography>
+                    <IconButton
+                        color="inherit"
+                        onClick={toggleTheme}
+                        sx={{ mr: 1 }}
+                        title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                    >
+                        {isDark ? <LightModeIcon /> : <DarkModeIcon />}
+                    </IconButton>
                     <Button
                         color="inherit"
                         onClick={handleLogout}

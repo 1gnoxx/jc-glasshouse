@@ -264,7 +264,7 @@ const InventoryPage = () => {
                 gap={2}
                 mb={3}
             >
-                <Typography variant="h5" sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
+                <Typography variant="h5" sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' }, color: 'primary.main' }}>
                     <Inventory2 sx={{ mr: 1, verticalAlign: 'middle', fontSize: { xs: 20, sm: 24 } }} />
                     Inventory
                 </Typography>

@@ -2006,7 +2006,7 @@ const SalesPage = () => {
 
     return (
         <Box p={3}>
-            <Typography variant="h4" gutterBottom>
+            <Typography variant="h4" gutterBottom sx={{ color: 'primary.main' }}>
                 <Receipt sx={{ verticalAlign: 'middle', mr: 1 }} />
                 Sales
             </Typography>

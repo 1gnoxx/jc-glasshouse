@@ -136,7 +136,7 @@ const ExpensesPage = () => {
                 gap={2}
                 mb={3}
             >
-                <Typography variant="h5" sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
+                <Typography variant="h5" sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' }, color: 'primary.main' }}>
                     Expenses
                 </Typography>
                 <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>

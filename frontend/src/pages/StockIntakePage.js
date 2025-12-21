@@ -974,7 +974,7 @@ const StockIntakePage = () => {
 
     return (
         <Box p={3}>
-            <Typography variant="h4" component="h1" gutterBottom>
+            <Typography variant="h4" component="h1" gutterBottom sx={{ color: 'primary.main' }}>
                 Stock Intake
             </Typography>
 

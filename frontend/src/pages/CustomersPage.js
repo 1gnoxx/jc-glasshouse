@@ -229,7 +229,7 @@ const CustomersPage = () => {
                 gap={2}
                 mb={3}
             >
-                <Typography variant="h5" component="h1" sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
+                <Typography variant="h5" component="h1" sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' }, color: 'primary.main' }}>
                     Customers
                 </Typography>
                 <Button

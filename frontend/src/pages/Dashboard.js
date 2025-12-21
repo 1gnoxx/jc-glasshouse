@@ -336,11 +336,11 @@ const Dashboard = () => {
   }
 
   return (
-    <Box p={3} sx={{ bgcolor: '#f8fafc', minHeight: '100vh' }}>
+    <Box p={3} sx={{ bgcolor: 'background.default', minHeight: '100vh' }}>
       {/* Header Section */}
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
         <Box>
-          <Typography variant="h4" fontWeight="bold" gutterBottom>
+          <Typography variant="h4" fontWeight="bold" gutterBottom sx={{ color: 'primary.main' }}>
             {getTimeGreeting()}, {user?.full_name || user?.username}! 👋
           </Typography>
           <Typography variant="body1" color="text.secondary">

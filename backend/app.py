@@ -124,6 +124,16 @@ def create_app():
     def index():
         return jsonify({"message": "Welcome to the Workshop Inventory API"})
 
+    @app.route('/health')
+    def health():
+        """Health check endpoint that also pings the database to keep connections alive."""
+        try:
+            from sqlalchemy import text
+            db.session.execute(text('SELECT 1'))
+            return 'OK', 200
+        except Exception as e:
+            return f'DB Error: {str(e)}', 500
+
     return app
 
 app = create_app()

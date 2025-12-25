@@ -126,13 +126,32 @@ def create_app():
 
     @app.route('/health')
     def health():
-        """Health check endpoint that also pings the database to keep connections alive."""
-        try:
-            from sqlalchemy import text
-            db.session.execute(text('SELECT 1'))
-            return 'OK', 200
-        except Exception as e:
-            return f'DB Error: {str(e)}', 500
+        """
+        Health check endpoint with working hours support.
+        - During 7 AM - 12 AM IST: Pings database to keep connections alive
+        - Outside working hours: Returns OK without DB ping (allows backend to sleep)
+        """
+        from datetime import datetime, timezone, timedelta
+        
+        # IST is UTC+5:30
+        ist_offset = timedelta(hours=5, minutes=30)
+        ist_time = datetime.now(timezone.utc) + ist_offset
+        current_hour = ist_time.hour
+        
+        # Working hours: 7 AM (7) to 12 AM (0) IST
+        # That means: 7 <= hour <= 23 OR hour == 0
+        is_working_hours = (7 <= current_hour <= 23) or (current_hour == 0)
+        
+        if is_working_hours:
+            try:
+                from sqlalchemy import text
+                db.session.execute(text('SELECT 1'))
+                return f'OK - DB Active (IST: {ist_time.strftime("%H:%M")})', 200
+            except Exception as e:
+                return f'DB Error: {str(e)}', 500
+        else:
+            # Outside working hours - just return OK without DB ping
+            return f'OK - Off Hours (IST: {ist_time.strftime("%H:%M")})', 200
 
     return app
 

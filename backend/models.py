@@ -42,10 +42,10 @@ class Product(db.Model):
     tags = db.Column(db.JSON, nullable=False, default=list)  # Multi-tag support
     description = db.Column(db.Text, nullable=True)
     
-    # Specifications
-    length_mm = db.Column(db.Float, nullable=True)
-    width_mm = db.Column(db.Float, nullable=True)
-    thickness_mm = db.Column(db.Float, nullable=True)
+    # Specifications - stored as String to preserve exact format (e.g., 19.10 not 19.1)
+    length_mm = db.Column(db.String(20), nullable=True)
+    width_mm = db.Column(db.String(20), nullable=True)
+    thickness_mm = db.Column(db.String(20), nullable=True)
     year = db.Column(db.String(50), nullable=True)  # e.g., "2020" or "2018-2023"
     
     # Inventory Management

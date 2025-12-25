@@ -71,7 +71,53 @@ const InventoryPage = () => {
         setOrderBy(property);
     };
 
+    /**
+     * Custom comparator for dimensions that handles the fractional format:
+     * .1 < .2 < ... < .9 < .10 < .11 < .12 < .13
+     * This splits the number into whole and fractional parts for proper ordering.
+     */
+    const parseDimensionValue = (value) => {
+        if (value === null || value === undefined || value === '') return null;
+        const numValue = parseFloat(value);
+        if (isNaN(numValue)) return null;
+
+        // Split into whole and fractional parts
+        // For 19.10: whole = 19, fractional = 10
+        // For 19.9: whole = 19, fractional = 9
+        const valueStr = String(value);
+        if (valueStr.includes('.')) {
+            const parts = valueStr.split('.');
+            const whole = parseInt(parts[0], 10);
+            const fractional = parseInt(parts[1], 10);
+            return { whole, fractional };
+        } else {
+            return { whole: parseInt(valueStr, 10), fractional: 0 };
+        }
+    };
+
+    const compareDimensions = (aVal, bVal) => {
+        const a = parseDimensionValue(aVal);
+        const b = parseDimensionValue(bVal);
+
+        // Handle nulls
+        if (a === null && b === null) return 0;
+        if (a === null) return 1;  // Nulls go to end
+        if (b === null) return -1;
+
+        // Compare whole parts first
+        if (a.whole !== b.whole) {
+            return a.whole - b.whole;
+        }
+        // Then compare fractional parts (where 10 > 9)
+        return a.fractional - b.fractional;
+    };
+
     const descendingComparator = (a, b, orderBy) => {
+        // Use custom comparator for dimension columns
+        if (orderBy === 'length_mm' || orderBy === 'width_mm') {
+            return -compareDimensions(a[orderBy], b[orderBy]);
+        }
+
         if (b[orderBy] < a[orderBy]) {
             return -1;
         }

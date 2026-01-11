@@ -27,7 +27,10 @@ import {
   ListItemIcon,
   ListItemText,
   Snackbar,
-  Alert
+  Alert,
+  FormControl,
+  Select,
+  InputLabel
 } from '@mui/material';
 import {
   TrendingUp,
@@ -942,19 +945,52 @@ const Reports = () => {
             </Typography>
           </Box>
           <Box display="flex" gap={2} alignItems="center">
-            <TextField
-              type="month"
-              value={selectedMonth}
-              onChange={(e) => setSelectedMonth(e.target.value)}
-              size="small"
-              sx={{
-                bgcolor: 'background.paper',
-                borderRadius: 1,
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2
-                }
-              }}
-            />
+            <FormControl size="small" sx={{ minWidth: 130, bgcolor: 'background.paper', borderRadius: 1 }}>
+              <InputLabel>Month</InputLabel>
+              <Select
+                value={parseInt(selectedMonth.split('-')[1])}
+                label="Month"
+                onChange={(e) => {
+                  const year = selectedMonth.split('-')[0];
+                  const month = String(e.target.value).padStart(2, '0');
+                  setSelectedMonth(`${year}-${month}`);
+                }}
+                sx={{ borderRadius: 2 }}
+              >
+                {[
+                  { value: 1, label: 'January' },
+                  { value: 2, label: 'February' },
+                  { value: 3, label: 'March' },
+                  { value: 4, label: 'April' },
+                  { value: 5, label: 'May' },
+                  { value: 6, label: 'June' },
+                  { value: 7, label: 'July' },
+                  { value: 8, label: 'August' },
+                  { value: 9, label: 'September' },
+                  { value: 10, label: 'October' },
+                  { value: 11, label: 'November' },
+                  { value: 12, label: 'December' }
+                ].map((m) => (
+                  <MenuItem key={m.value} value={m.value}>{m.label}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl size="small" sx={{ minWidth: 90, bgcolor: 'background.paper', borderRadius: 1 }}>
+              <InputLabel>Year</InputLabel>
+              <Select
+                value={parseInt(selectedMonth.split('-')[0])}
+                label="Year"
+                onChange={(e) => {
+                  const month = selectedMonth.split('-')[1];
+                  setSelectedMonth(`${e.target.value}-${month}`);
+                }}
+                sx={{ borderRadius: 2 }}
+              >
+                {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - 5 + i).map((year) => (
+                  <MenuItem key={year} value={year}>{year}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
             <Tooltip title="Refresh Data">
               <IconButton
                 onClick={handleRefresh}

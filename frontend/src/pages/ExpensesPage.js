@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
     Box, Paper, Typography, Button, TextField, Grid, Table, TableBody, TableCell,
     TableContainer, TableHead, TableRow, IconButton, Dialog, DialogTitle, DialogContent,
-    DialogActions, Card, CardContent, CircularProgress, MenuItem, Chip
+    DialogActions, Card, CardContent, CircularProgress, MenuItem, Chip, FormControl, Select, InputLabel
 } from '@mui/material';
 import { Add, Edit, Delete, AttachMoney } from '@mui/icons-material';
 import api from '../services/api';
@@ -141,14 +141,50 @@ const ExpensesPage = () => {
                         Expenses
                     </Typography>
                     <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                        <TextField
-                            type="month"
-                            size="small"
-                            value={selectedMonth}
-                            onChange={(e) => setSelectedMonth(e.target.value)}
-                            InputLabelProps={{ shrink: true }}
-                            sx={{ minWidth: 150 }}
-                        />
+                        <FormControl size="small" sx={{ minWidth: 120 }}>
+                            <InputLabel>Month</InputLabel>
+                            <Select
+                                value={parseInt(selectedMonth.split('-')[1])}
+                                label="Month"
+                                onChange={(e) => {
+                                    const year = selectedMonth.split('-')[0];
+                                    const month = String(e.target.value).padStart(2, '0');
+                                    setSelectedMonth(`${year}-${month}`);
+                                }}
+                            >
+                                {[
+                                    { value: 1, label: 'January' },
+                                    { value: 2, label: 'February' },
+                                    { value: 3, label: 'March' },
+                                    { value: 4, label: 'April' },
+                                    { value: 5, label: 'May' },
+                                    { value: 6, label: 'June' },
+                                    { value: 7, label: 'July' },
+                                    { value: 8, label: 'August' },
+                                    { value: 9, label: 'September' },
+                                    { value: 10, label: 'October' },
+                                    { value: 11, label: 'November' },
+                                    { value: 12, label: 'December' }
+                                ].map((m) => (
+                                    <MenuItem key={m.value} value={m.value}>{m.label}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                        <FormControl size="small" sx={{ minWidth: 90 }}>
+                            <InputLabel>Year</InputLabel>
+                            <Select
+                                value={parseInt(selectedMonth.split('-')[0])}
+                                label="Year"
+                                onChange={(e) => {
+                                    const month = selectedMonth.split('-')[1];
+                                    setSelectedMonth(`${e.target.value}-${month}`);
+                                }}
+                            >
+                                {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - 5 + i).map((year) => (
+                                    <MenuItem key={year} value={year}>{year}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
                         <Button variant="contained" startIcon={<Add />} onClick={() => setDialog(true)}>
                             Add
                         </Button>

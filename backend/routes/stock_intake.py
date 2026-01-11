@@ -353,6 +353,14 @@ def update_stock_intake(intake_id):
     intake.status = intake.calculate_status()
     new_status = intake.status
     
+    # When transitioning from pending to completed, update product purchase prices
+    if old_status == 'pending' and new_status == 'completed':
+        for item in intake.items:
+            product = Product.query.get(item.product_id)
+            if product and item.purchase_price_per_unit is not None:
+                # Update product's purchase price with the latest intake item price
+                product.purchase_price = item.purchase_price_per_unit
+    
     db.session.commit()
     
     # Manage expense based on status changes

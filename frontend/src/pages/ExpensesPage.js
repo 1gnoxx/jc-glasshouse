@@ -153,6 +153,7 @@ const ExpensesPage = () => {
                                 }}
                             >
                                 {[
+                                    { value: 0, label: '📅 Full Year' },
                                     { value: 1, label: 'January' },
                                     { value: 2, label: 'February' },
                                     { value: 3, label: 'March' },

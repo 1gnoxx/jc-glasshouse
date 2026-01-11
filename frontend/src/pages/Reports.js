@@ -275,10 +275,23 @@ const Reports = () => {
       const expenseSummary = expensesRes.data.data || { categories: {}, total: 0 };
       const stockIntakes = stockIntakeRes.data.data || [];
 
-      // Current month sales
-      const monthStart = new Date(selectedMonth + '-01');
-      const monthEnd = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0);
+      // Parse selected month - handle full year option (month = 00)
+      const [selectedYear, selectedMonthNum] = selectedMonth.split('-').map(Number);
+      const isFullYear = selectedMonthNum === 0;
+
+      // Filter sales based on selected period
+      let monthStart, monthEnd;
+      if (isFullYear) {
+        // Full year: Jan 1 to Dec 31
+        monthStart = new Date(selectedYear, 0, 1);
+        monthEnd = new Date(selectedYear, 11, 31);
+      } else {
+        // Specific month
+        monthStart = new Date(selectedYear, selectedMonthNum - 1, 1);
+        monthEnd = new Date(selectedYear, selectedMonthNum, 0);
+      }
       monthEnd.setHours(23, 59, 59, 999);
+
       const monthSales = sales.filter(s => {
         const saleDate = new Date(s.sale_date);
         return saleDate >= monthStart && saleDate <= monthEnd && s.status === 'completed';
@@ -330,17 +343,35 @@ const Reports = () => {
       // Low stock products
       const lowStockCount = products.filter(p => p.stock_quantity <= (p.low_stock_threshold || 5)).length;
 
-      // Sales Trend (Daily)
-      const dailySales = {};
-      const daysInMonth = monthEnd.getDate();
-      for (let i = 1; i <= daysInMonth; i++) {
-        dailySales[i] = 0;
+      // Sales Trend - Monthly for full year, Daily for specific month
+      let monthlyTrend, trendLabels;
+      if (isFullYear) {
+        // Monthly trend for full year (12 months)
+        const monthlySales = {};
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        for (let i = 0; i < 12; i++) {
+          monthlySales[i] = 0;
+        }
+        monthSales.forEach(sale => {
+          const month = new Date(sale.sale_date).getMonth();
+          monthlySales[month] += sale.total_amount || 0;
+        });
+        monthlyTrend = Object.values(monthlySales);
+        trendLabels = monthNames;
+      } else {
+        // Daily trend for specific month
+        const dailySales = {};
+        const daysInMonth = monthEnd.getDate();
+        for (let i = 1; i <= daysInMonth; i++) {
+          dailySales[i] = 0;
+        }
+        monthSales.forEach(sale => {
+          const day = new Date(sale.sale_date).getDate();
+          dailySales[day] += sale.total_amount || 0;
+        });
+        monthlyTrend = Object.values(dailySales);
+        trendLabels = Array.from({ length: daysInMonth }, (_, i) => i + 1);
       }
-      monthSales.forEach(sale => {
-        const day = new Date(sale.sale_date).getDate();
-        dailySales[day] += sale.total_amount || 0;
-      });
-      const monthlyTrend = Object.values(dailySales);
 
       // Payment Status Breakdown
       const paymentStatusCounts = { paid: 0, partial: 0, unpaid: 0 };
@@ -362,6 +393,8 @@ const Reports = () => {
         topProducts,
         stockByTag,
         monthlyTrend,
+        trendLabels,
+        isFullYear,
         paymentStatusCounts,
         monthSales,
         expenseBreakdown: expenseSummary.categories || {},
@@ -381,9 +414,9 @@ const Reports = () => {
   };
 
   const salesTrendData = {
-    labels: Array.from({ length: analytics.monthlyTrend.length }, (_, i) => i + 1),
+    labels: analytics.trendLabels || Array.from({ length: analytics.monthlyTrend.length }, (_, i) => i + 1),
     datasets: [{
-      label: 'Daily Revenue (₹)',
+      label: analytics.isFullYear ? 'Monthly Revenue (₹)' : 'Daily Revenue (₹)',
       data: analytics.monthlyTrend,
       borderColor: '#6366f1',
       backgroundColor: 'rgba(99, 102, 241, 0.1)',
@@ -958,6 +991,7 @@ const Reports = () => {
                 sx={{ borderRadius: 2 }}
               >
                 {[
+                  { value: 0, label: '📅 Full Year' },
                   { value: 1, label: 'January' },
                   { value: 2, label: 'February' },
                   { value: 3, label: 'March' },

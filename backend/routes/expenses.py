@@ -64,10 +64,14 @@ def get_expenses():
     if month:
         try:
             year, month_num = map(int, month.split('-'))
-            query = query.filter(
-                extract('year', Expense.date) == year,
-                extract('month', Expense.date) == month_num
-            )
+            if month_num == 0:
+                # Full year filter (month=00 means all months)
+                query = query.filter(extract('year', Expense.date) == year)
+            else:
+                query = query.filter(
+                    extract('year', Expense.date) == year,
+                    extract('month', Expense.date) == month_num
+                )
         except ValueError:
             return jsonify({"msg": "Invalid month format. Use YYYY-MM"}), 400
     
@@ -100,13 +104,16 @@ def get_expenses_summary():
         return jsonify({"msg": "Invalid month format. Use YYYY-MM"}), 400
     
     # Get expenses grouped by category
-    category_totals = db.session.query(
+    query = db.session.query(
         Expense.category,
         func.sum(Expense.amount).label('total')
-    ).filter(
-        extract('year', Expense.date) == year,
-        extract('month', Expense.date) == month_num
-    ).group_by(Expense.category).all()
+    ).filter(extract('year', Expense.date) == year)
+    
+    if month_num != 0:
+        # Filter by specific month (0 means full year)
+        query = query.filter(extract('month', Expense.date) == month_num)
+    
+    category_totals = query.group_by(Expense.category).all()
     
     total = sum(ct.total for ct in category_totals)
     

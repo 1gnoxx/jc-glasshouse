@@ -255,3 +255,86 @@ def get_product_stock_by_warehouse(product_id):
             } for s in stocks]
         }
     })
+
+# ============== MIGRATION ENDPOINT ==============
+
+@warehouses_bp.route('/migrate-stock-to-bhaijaan', methods=['POST'])
+@jwt_required()
+def migrate_stock_to_bhaijaan():
+    """
+    One-time migration: Assign all existing product stock to BhaiJaan warehouse.
+    This creates ProductStock records for each product at BhaiJaan.
+    Only works for Abbas (admin).
+    """
+    user = get_current_user()
+    
+    # Only allow Abbas (admin) to run this
+    if not user or user.username != 'abbas':
+        return jsonify({"msg": "Only admin can run migrations"}), 403
+    
+    # Find BhaiJaan warehouse
+    bhaijaan = Warehouse.query.filter_by(code='BHAIJAAN').first()
+    
+    if not bhaijaan:
+        return jsonify({"msg": "BhaiJaan warehouse not found"}), 404
+    
+    # Get all products with stock > 0
+    products = Product.query.filter(Product.stock_quantity > 0).all()
+    
+    if not products:
+        return jsonify({
+            "success": True,
+            "msg": "No products with stock found. Nothing to migrate.",
+            "migrated": 0,
+            "skipped": 0
+        })
+    
+    migrated_count = 0
+    skipped_count = 0
+    migrated_products = []
+    
+    for product in products:
+        # Check if ProductStock already exists for this product at BhaiJaan
+        existing_stock = ProductStock.query.filter_by(
+            product_id=product.id,
+            warehouse_id=bhaijaan.id
+        ).first()
+        
+        if existing_stock:
+            if existing_stock.quantity == product.stock_quantity:
+                skipped_count += 1
+                continue
+            else:
+                # Update existing record
+                old_qty = existing_stock.quantity
+                existing_stock.quantity = product.stock_quantity
+                migrated_products.append({
+                    'name': product.name,
+                    'old_qty': old_qty,
+                    'new_qty': product.stock_quantity
+                })
+                migrated_count += 1
+        else:
+            # Create new ProductStock record
+            product_stock = ProductStock(
+                product_id=product.id,
+                warehouse_id=bhaijaan.id,
+                quantity=product.stock_quantity
+            )
+            db.session.add(product_stock)
+            migrated_products.append({
+                'name': product.name,
+                'old_qty': 0,
+                'new_qty': product.stock_quantity
+            })
+            migrated_count += 1
+    
+    db.session.commit()
+    
+    return jsonify({
+        "success": True,
+        "msg": f"Migration complete! Migrated {migrated_count} products, skipped {skipped_count}",
+        "migrated": migrated_count,
+        "skipped": skipped_count,
+        "products": migrated_products
+    })

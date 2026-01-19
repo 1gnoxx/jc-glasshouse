@@ -38,11 +38,13 @@ import {
     Refresh,
     Warning,
     Inventory2,
-    FilterList
+    FilterList,
+    SwapHoriz
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
 import api from '../services/api';
+import TransferDialog from '../components/TransferDialog';
 
 const InventoryPage = () => {
     const { user } = useAuth();
@@ -64,6 +66,12 @@ const InventoryPage = () => {
     // Sorting
     const [order, setOrder] = useState('asc');
     const [orderBy, setOrderBy] = useState('name');
+
+    // Warehouse
+    const [warehouses, setWarehouses] = useState([]);
+    const [warehouseFilter, setWarehouseFilter] = useState('');
+    const [transferDialogOpen, setTransferDialogOpen] = useState(false);
+    const [selectedProductForTransfer, setSelectedProductForTransfer] = useState(null);
 
     const handleRequestSort = (property) => {
         const isAsc = orderBy === property && order === 'asc';
@@ -155,11 +163,12 @@ const InventoryPage = () => {
 
     useEffect(() => {
         fetchProducts();
+        fetchWarehouses();
     }, []);
 
     useEffect(() => {
         applyFilters();
-    }, [products, searchTerm, tagFilter, stockFilter]);
+    }, [products, searchTerm, tagFilter, stockFilter, warehouseFilter]);
 
     const fetchProducts = async () => {
         try {
@@ -172,6 +181,17 @@ const InventoryPage = () => {
             setError('Failed to load products');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchWarehouses = async () => {
+        try {
+            const response = await api.get('/warehouses');
+            if (response.data.success) {
+                setWarehouses(response.data.data || []);
+            }
+        } catch (err) {
+            console.error('Error fetching warehouses:', err);
         }
     };
 
@@ -200,6 +220,17 @@ const InventoryPage = () => {
             filtered = filtered.filter(p => p.stock_quantity === 0);
         } else if (stockFilter === 'in_stock') {
             filtered = filtered.filter(p => p.stock_quantity > 0);
+        }
+
+        // Warehouse filter - show only products with stock at selected warehouse
+        if (warehouseFilter) {
+            filtered = filtered.filter(p => {
+                const warehouseStocks = p.warehouse_stocks || {};
+                const selectedWarehouse = warehouses.find(w => w.id === warehouseFilter);
+                if (!selectedWarehouse) return true;
+                const stockAtWarehouse = warehouseStocks[selectedWarehouse.code];
+                return stockAtWarehouse && stockAtWarehouse.quantity > 0;
+            });
         }
 
         setFilteredProducts(filtered);
@@ -280,14 +311,24 @@ const InventoryPage = () => {
         return 'In Stock';
     };
 
+    const handleTransferClick = (product) => {
+        setSelectedProductForTransfer(product);
+        setTransferDialogOpen(true);
+    };
+
+    const handleTransferComplete = () => {
+        fetchProducts();
+    };
+
     // Helper for table headers
     const headCells = [
         { id: 'name', label: 'Name', align: 'left' },
         { id: 'category', label: 'Tags', align: 'left' },
-        { id: 'length_mm', label: 'Length (inches)', align: 'center' },
-        { id: 'width_mm', label: 'Width (inches)', align: 'center' },
-        { id: 'stock_quantity', label: 'Stock', align: 'center' },
-        ...(canViewFinancials ? [{ id: 'purchase_price', label: 'Purchase Price', align: 'right' }] : []),
+        { id: 'length_mm', label: 'Length (in)', align: 'center' },
+        { id: 'width_mm', label: 'Width (in)', align: 'center' },
+        { id: 'stock_quantity', label: 'Total', align: 'center' },
+        ...warehouses.map(w => ({ id: `warehouse_${w.id}`, label: w.name, align: 'center', disableSort: true })),
+        ...(canViewFinancials ? [{ id: 'purchase_price', label: 'Purchase ₹', align: 'right' }] : []),
         { id: 'actions', label: 'Actions', align: 'center', disableSort: true },
     ];
 
@@ -323,6 +364,15 @@ const InventoryPage = () => {
                             sx={{ flex: { xs: 1, sm: 'none' } }}
                         >
                             Refresh
+                        </Button>
+                        <Button
+                            variant="outlined"
+                            color="secondary"
+                            startIcon={<SwapHoriz />}
+                            onClick={() => setTransferDialogOpen(true)}
+                            sx={{ flex: { xs: 1, sm: 'none' } }}
+                        >
+                            Transfer
                         </Button>
                         <Button
                             variant="contained"
@@ -493,12 +543,38 @@ const InventoryPage = () => {
                                                     {product.stock_quantity}
                                                 </Typography>
                                             </TableCell>
+                                            {/* Per-warehouse stock columns */}
+                                            {warehouses.map(w => {
+                                                const warehouseStocks = product.warehouse_stocks || {};
+                                                const stockData = warehouseStocks[w.code];
+                                                const qty = stockData?.quantity || 0;
+                                                return (
+                                                    <TableCell key={w.id} align="center">
+                                                        <Typography
+                                                            variant="body2"
+                                                            color={qty === 0 ? 'text.secondary' : 'inherit'}
+                                                        >
+                                                            {qty}
+                                                        </Typography>
+                                                    </TableCell>
+                                                );
+                                            })}
                                             {canViewFinancials && (
                                                 <TableCell align="right">
                                                     ₹{product.purchase_price?.toLocaleString() || 'N/A'}
                                                 </TableCell>
                                             )}
                                             <TableCell align="center">
+                                                <Tooltip title="Transfer">
+                                                    <IconButton
+                                                        size="small"
+                                                        onClick={() => handleTransferClick(product)}
+                                                        color="secondary"
+                                                        disabled={product.stock_quantity === 0}
+                                                    >
+                                                        <SwapHoriz />
+                                                    </IconButton>
+                                                </Tooltip>
                                                 <Tooltip title="Edit">
                                                     <IconButton
                                                         size="small"
@@ -571,6 +647,17 @@ const InventoryPage = () => {
                         </Button>
                     </DialogActions>
                 </Dialog>
+
+                {/* Stock Transfer Dialog */}
+                <TransferDialog
+                    open={transferDialogOpen}
+                    onClose={() => {
+                        setTransferDialogOpen(false);
+                        setSelectedProductForTransfer(null);
+                    }}
+                    onTransferComplete={handleTransferComplete}
+                    selectedProduct={selectedProductForTransfer}
+                />
             </Paper>
         </Box >
     );

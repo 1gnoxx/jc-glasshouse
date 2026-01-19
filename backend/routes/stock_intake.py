@@ -6,10 +6,28 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy import func
 from sqlalchemy.orm import joinedload
 from datetime import datetime, date
-from models import db, StockIntake, StockIntakeItem, Product, User, Expense
+from models import db, StockIntake, StockIntakeItem, Product, User, Expense, Warehouse, ProductStock
 from routes.utils import get_current_user
 
 stock_intake_bp = Blueprint('stock_intake_bp', __name__)
+
+def get_or_create_product_stock(product_id, warehouse_id):
+    """Get or create ProductStock record for a product at a warehouse"""
+    stock = ProductStock.query.filter_by(
+        product_id=product_id,
+        warehouse_id=warehouse_id
+    ).first()
+    
+    if not stock:
+        stock = ProductStock(
+            product_id=product_id,
+            warehouse_id=warehouse_id,
+            quantity=0
+        )
+        db.session.add(stock)
+        db.session.flush()
+    
+    return stock
 
 @stock_intake_bp.route('', methods=['POST'])
 @jwt_required()
@@ -38,6 +56,21 @@ def create_stock_intake():
             return jsonify({"msg": "Invalid date format. Use YYYY-MM-DD"}), 400
     else:
         intake_date = date.today()
+    
+    # Get warehouse (default to BhaiJaan if not specified)
+    warehouse_id = data.get('warehouse_id')
+    if warehouse_id:
+        warehouse = Warehouse.query.get(warehouse_id)
+        if not warehouse:
+            return jsonify({"msg": "Invalid warehouse"}), 400
+    else:
+        # Use default intake warehouse (BhaiJaan)
+        warehouse = Warehouse.query.filter_by(is_default_intake=True).first()
+        if not warehouse:
+            # Fallback to first warehouse
+            warehouse = Warehouse.query.first()
+        if warehouse:
+            warehouse_id = warehouse.id
     
     # Validate products
     product_ids = [item.get('product_id') for item in data['items']]
@@ -69,6 +102,7 @@ def create_stock_intake():
         intake_date=intake_date,
         supplier_name=data['supplier_name'],
         notes=data.get('notes'),
+        warehouse_id=warehouse_id,
         created_by_user_id=user.id
     )
     
@@ -89,8 +123,13 @@ def create_stock_intake():
         )
         db.session.add(intake_item)
         
-        # Update product stock quantity
+        # Update product total stock quantity
         product.stock_quantity += quantity
+        
+        # Update per-warehouse stock (if warehouse specified)
+        if warehouse_id:
+            product_stock = get_or_create_product_stock(product.id, warehouse_id)
+            product_stock.quantity += quantity
         
         # Optionally update purchase price if provided
         if purchase_price is not None and data.get('update_purchase_price', False):

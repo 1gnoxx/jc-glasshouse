@@ -202,6 +202,9 @@ class StockIntake(db.Model):
     notes = db.Column(db.Text, nullable=True)
     status = db.Column(db.String(20), default='pending', nullable=False)  # 'pending' or 'completed'
     
+    # Warehouse where stock is received (default: BhaiJaan)
+    warehouse_id = db.Column(db.Integer, db.ForeignKey('warehouse.id'), nullable=True)
+    
     # System fields
     created_by_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     created_at = db.Column(db.DateTime, server_default=func.now())
@@ -209,6 +212,7 @@ class StockIntake(db.Model):
     # Relationships
     created_by = db.relationship('User', backref='stock_intakes')
     items = db.relationship('StockIntakeItem', backref='intake', lazy=True, cascade="all, delete-orphan")
+    warehouse = db.relationship('Warehouse', backref='stock_intakes')
     
     @property
     def total_items_count(self):
@@ -294,3 +298,63 @@ class TimelineEvent(db.Model):
     timestamp = db.Column(db.DateTime, server_default=func.now())
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     user = db.relationship('User', backref='timeline_events')
+
+# ============== MULTI-WAREHOUSE MODELS ==============
+
+class Warehouse(db.Model):
+    """Warehouse/Location model for tracking inventory across multiple locations"""
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(20), unique=True, nullable=False)  # 'BHAIJAAN', 'MAHAPOLI'
+    name = db.Column(db.String(100), nullable=False)  # 'BhaiJaan', 'Mahapoli'
+    description = db.Column(db.Text, nullable=True)
+    is_default_intake = db.Column(db.Boolean, default=False)  # BhaiJaan: True (where stock comes in)
+    is_shipping_location = db.Column(db.Boolean, default=False)  # Mahapoli: True (where orders ship from)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, server_default=func.now())
+    
+    # Relationships
+    product_stocks = db.relationship('ProductStock', backref='warehouse', lazy=True)
+    
+    def __repr__(self):
+        return f'<Warehouse {self.code}: {self.name}>'
+
+class ProductStock(db.Model):
+    """Per-warehouse stock tracking - tracks quantity of each product at each warehouse"""
+    id = db.Column(db.Integer, primary_key=True)
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
+    warehouse_id = db.Column(db.Integer, db.ForeignKey('warehouse.id'), nullable=False)
+    quantity = db.Column(db.Integer, default=0, nullable=False)
+    updated_at = db.Column(db.DateTime, onupdate=func.now())
+    
+    # Relationships
+    product = db.relationship('Product', backref=db.backref('warehouse_stocks', lazy=True))
+    
+    # Unique constraint: one record per product-warehouse pair
+    __table_args__ = (db.UniqueConstraint('product_id', 'warehouse_id', name='unique_product_warehouse'),)
+    
+    def __repr__(self):
+        return f'<ProductStock: {self.quantity}x Product#{self.product_id} at Warehouse#{self.warehouse_id}>'
+
+class StockTransfer(db.Model):
+    """Stock transfer record between warehouses"""
+    id = db.Column(db.Integer, primary_key=True)
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
+    from_warehouse_id = db.Column(db.Integer, db.ForeignKey('warehouse.id'), nullable=False)
+    to_warehouse_id = db.Column(db.Integer, db.ForeignKey('warehouse.id'), nullable=False)
+    quantity = db.Column(db.Integer, nullable=False)
+    transfer_date = db.Column(db.DateTime, server_default=func.now())
+    notes = db.Column(db.Text, nullable=True)
+    
+    # System fields
+    created_by_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    created_at = db.Column(db.DateTime, server_default=func.now())
+    
+    # Relationships
+    product = db.relationship('Product', backref='transfers')
+    from_warehouse = db.relationship('Warehouse', foreign_keys=[from_warehouse_id], backref='outgoing_transfers')
+    to_warehouse = db.relationship('Warehouse', foreign_keys=[to_warehouse_id], backref='incoming_transfers')
+    created_by = db.relationship('User', backref='stock_transfers')
+    
+    def __repr__(self):
+        return f'<StockTransfer: {self.quantity}x Product#{self.product_id} from {self.from_warehouse_id} to {self.to_warehouse_id}>'
+

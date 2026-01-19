@@ -6,7 +6,8 @@ from flask import Blueprint, request, jsonify
 import json
 from flask_jwt_extended import jwt_required, get_jwt
 from sqlalchemy import and_, or_
-from models import db, Product, ProductCategory
+from sqlalchemy.orm import joinedload
+from models import db, Product, ProductCategory, ProductStock, Warehouse
 from .utils import get_current_user
 
 products_bp = Blueprint('products_bp', __name__)
@@ -23,13 +24,16 @@ def get_products():
     - stock_status: all, in_stock, low_stock, out_of_stock
     - search: search in name, product_code, year
     - is_active: true/false (default: true)
+    - warehouse_id: filter by stock at specific warehouse
     """
     # Get current user for financial data filtering
     claims = get_jwt()
     can_view_financials = claims.get('can_view_financials', False)
     
-    # Base query
-    query = Product.query
+    # Base query with warehouse stocks eager-loaded
+    query = Product.query.options(
+        joinedload(Product.warehouse_stocks).joinedload(ProductStock.warehouse)
+    )
     
     # Filter by active status (default: only active products)
     is_active = request.args.get('is_active', 'true').lower() == 'true'
@@ -81,9 +85,31 @@ def get_products():
     # Execute query
     products = query.all()
     
+    # Filter by warehouse stock if specified
+    warehouse_id = request.args.get('warehouse_id', type=int)
+    
     # Format response based on user permissions
     results = []
     for product in products:
+        # Build per-warehouse stock breakdown
+        warehouse_stocks = {}
+        for ws in product.warehouse_stocks:
+            if ws.warehouse:
+                warehouse_stocks[ws.warehouse.code] = {
+                    'warehouse_id': ws.warehouse.id,
+                    'warehouse_name': ws.warehouse.name,
+                    'quantity': ws.quantity
+                }
+        
+        # Skip products with no stock at specified warehouse
+        if warehouse_id:
+            stock_at_warehouse = next(
+                (ws for ws in product.warehouse_stocks if ws.warehouse_id == warehouse_id), 
+                None
+            )
+            if not stock_at_warehouse or stock_at_warehouse.quantity <= 0:
+                continue
+        
         product_data = {
             'id': product.id,
             'product_code': product.product_code,
@@ -96,6 +122,7 @@ def get_products():
             'thickness_mm': product.thickness_mm,
             'year': product.year,
             'stock_quantity': product.stock_quantity,
+            'warehouse_stocks': warehouse_stocks,
             'low_stock_threshold': product.low_stock_threshold,
             'is_low_stock': product.is_low_stock,
             'selling_price': product.selling_price,

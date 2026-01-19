@@ -5,7 +5,7 @@ from flask_cors import CORS
 import click
 import os
 
-from models import db, User
+from models import db, User, Warehouse
 from config import Config
 
 # Import blueprints
@@ -15,6 +15,7 @@ from routes.sales import sales_bp
 from routes.customers import customers_bp
 from routes.stock_intake import stock_intake_bp
 from routes.expenses import expenses_bp
+from routes.warehouses import warehouses_bp
 # Legacy routes temporarily disabled during migration
 # from routes.user import user_bp
 # from routes.dashboard import dashboard_bp
@@ -43,19 +44,12 @@ def create_app():
     # app.register_blueprint(user_bp, url_prefix='/api/users')
     # app.register_blueprint(dashboard_bp, url_prefix='/api/dashboard')
     app.register_blueprint(catalog_bp, url_prefix='/api/catalog')
+    app.register_blueprint(warehouses_bp, url_prefix='/api/warehouses')
     # app.register_blueprint(timeline_bp, url_prefix='/api/timeline')
 
     # Auto-initialize database on startup (for serverless/free tier deployments)
     with app.app_context():
         try:
-            # ONE-TIME FIX: Drop user table to fix column size (128->256)
-            # This is safe because we only have 2 system users
-            from sqlalchemy import text
-            with db.engine.connect() as conn:
-                conn.execute(text("DROP TABLE IF EXISTS \"user\" CASCADE"))
-                conn.commit()
-            print("✅ Dropped old user table")
-            
             # Create all tables with correct schema
             db.create_all()
             print("✅ Database tables created/verified")
@@ -78,6 +72,32 @@ def create_app():
             irfan.set_password('irfanbhai123')
             db.session.add(irfan)
             print("✅ Irfan user created")
+            
+            db.session.commit()
+            print("✅ Users created")
+            
+            # Create default warehouses if they don't exist
+            if not Warehouse.query.filter_by(code='BHAIJAAN').first():
+                bhaijaan = Warehouse(
+                    code='BHAIJAAN',
+                    name='BhaiJaan',
+                    description='Main storage warehouse',
+                    is_default_intake=True,
+                    is_shipping_location=False
+                )
+                db.session.add(bhaijaan)
+                print("✅ BhaiJaan warehouse created")
+            
+            if not Warehouse.query.filter_by(code='MAHAPOLI').first():
+                mahapoli = Warehouse(
+                    code='MAHAPOLI',
+                    name='Mahapoli',
+                    description='Shipping/dispatch location',
+                    is_default_intake=False,
+                    is_shipping_location=True
+                )
+                db.session.add(mahapoli)
+                print("✅ Mahapoli warehouse created")
             
             db.session.commit()
             print("✅ Database initialization complete")

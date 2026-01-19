@@ -49,34 +49,42 @@ def create_app():
 
     # Auto-initialize database on startup (for serverless/free tier deployments)
     with app.app_context():
+        # Step 1: Create tables
         try:
-            # Create all tables with correct schema
             db.create_all()
             print("✅ Database tables created/verified")
+        except Exception as e:
+            print(f"⚠️ Table creation note: {e}")
+        
+        # Step 2: Create default users (if they don't exist)
+        try:
+            if not User.query.filter_by(username='abbas').first():
+                abbas = User(
+                    username='abbas',
+                    full_name='Abbas',
+                    can_view_financials=True
+                )
+                abbas.set_password('abbasarva31377')
+                db.session.add(abbas)
+                db.session.commit()
+                print("✅ Abbas user created")
             
-            # Create default users
-            abbas = User(
-                username='abbas',
-                full_name='Abbas',
-                can_view_financials=True
-            )
-            abbas.set_password('abbasarva31377')
-            db.session.add(abbas)
-            print("✅ Abbas user created")
-            
-            irfan = User(
-                username='irfan',
-                full_name='Irfan',
-                can_view_financials=False
-            )
-            irfan.set_password('irfanbhai123')
-            db.session.add(irfan)
-            print("✅ Irfan user created")
-            
-            db.session.commit()
-            print("✅ Users created")
-            
-            # Create default warehouses if they don't exist
+            if not User.query.filter_by(username='irfan').first():
+                irfan = User(
+                    username='irfan',
+                    full_name='Irfan',
+                    can_view_financials=False
+                )
+                irfan.set_password('irfanbhai123')
+                db.session.add(irfan)
+                db.session.commit()
+                print("✅ Irfan user created")
+        except Exception as e:
+            db.session.rollback()
+            print(f"⚠️ User creation note: {e}")
+        
+        # Step 3: Create default warehouses (if they don't exist)
+        try:
             if not Warehouse.query.filter_by(code='BHAIJAAN').first():
                 bhaijaan = Warehouse(
                     code='BHAIJAAN',
@@ -86,6 +94,7 @@ def create_app():
                     is_shipping_location=False
                 )
                 db.session.add(bhaijaan)
+                db.session.commit()
                 print("✅ BhaiJaan warehouse created")
             
             if not Warehouse.query.filter_by(code='MAHAPOLI').first():
@@ -97,12 +106,13 @@ def create_app():
                     is_shipping_location=True
                 )
                 db.session.add(mahapoli)
+                db.session.commit()
                 print("✅ Mahapoli warehouse created")
             
-            db.session.commit()
             print("✅ Database initialization complete")
         except Exception as e:
-            print(f"⚠️ Database initialization note: {e}")
+            db.session.rollback()
+            print(f"⚠️ Warehouse creation note: {e}")
 
     @app.cli.command("create-users")
     def create_users():

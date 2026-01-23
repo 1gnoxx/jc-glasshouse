@@ -114,6 +114,23 @@ def create_app():
             db.session.rollback()
             print(f"⚠️ Warehouse creation note: {e}")
 
+        # Step 4: Emergency Schema Fix (Auto-run)
+        try:
+            print("🔄 Checking for missing schema columns...")
+            from sqlalchemy import text
+            # Try to select warehouse_id from stock_intake
+            try:
+                db.session.execute(text("SELECT warehouse_id FROM stock_intake LIMIT 1"))
+            except Exception:
+                db.session.rollback()
+                print("⚠️ Column warehouse_id missing in stock_intake. Adding it...")
+                db.session.execute(text("ALTER TABLE stock_intake ADD COLUMN warehouse_id INTEGER REFERENCES warehouse(id)"))
+                db.session.commit()
+                print("✅ Added warehouse_id column")
+        except Exception as e:
+            print(f"⚠️ Schema check warning: {e}")
+            db.session.rollback()
+
     @app.cli.command("create-users")
     def create_users():
         """Creates Abbas (owner) and Irfan (manager) users."""

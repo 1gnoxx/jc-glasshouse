@@ -338,3 +338,24 @@ def migrate_stock_to_bhaijaan():
         "skipped": skipped_count,
         "products": migrated_products
     })
+
+@warehouses_bp.route('/fix-schema', methods=['POST'])
+@jwt_required()
+def fix_schema():
+    """
+    Emergency fix: Add missing warehouse_id column to stock_intake table
+    Run this if you see 'Failed to load stock intake history'
+    """
+    user = get_current_user()
+    if not user or user.username != 'abbas':
+        return jsonify({"msg": "Only admin can run fixes"}), 403
+        
+    try:
+        from sqlalchemy import text
+        # Add column if not exists
+        db.session.execute(text('ALTER TABLE stock_intake ADD COLUMN IF NOT EXISTS warehouse_id INTEGER REFERENCES warehouse(id);'))
+        db.session.commit()
+        return jsonify({"success": True, "msg": "Schema fixed: Added warehouse_id to stock_intake"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"success": False, "msg": f"Fix failed: {str(e)}"}), 500

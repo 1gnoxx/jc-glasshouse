@@ -53,7 +53,7 @@ const StockIntakePage = () => {
     const [selectedProducts, setSelectedProducts] = useState([]);
     const [currentProduct, setCurrentProduct] = useState(null);
     const [productInputValue, setProductInputValue] = useState(''); // Add input value state
-    const [quantity, setQuantity] = useState(1);
+    const [quantity, setQuantity] = useState('');
     const [purchasePrice, setPurchasePrice] = useState('');
 
     // History state
@@ -69,7 +69,7 @@ const StockIntakePage = () => {
     const [editItems, setEditItems] = useState([]);
     const [editCurrentProduct, setEditCurrentProduct] = useState(null);
     const [editProductInputValue, setEditProductInputValue] = useState('');
-    const [editQuantity, setEditQuantity] = useState(1);
+    const [editQuantity, setEditQuantity] = useState('');
     const [editPrice, setEditPrice] = useState('');
     const [deletedItemIds, setDeletedItemIds] = useState([]);
     const [newEditItems, setNewEditItems] = useState([]);
@@ -202,7 +202,7 @@ const StockIntakePage = () => {
 
         setCurrentProduct(null);
         setProductInputValue(''); // Clear the input text
-        setQuantity(1);
+        setQuantity('');
         setPurchasePrice('');
     };
 
@@ -274,7 +274,7 @@ const StockIntakePage = () => {
             // Reset edit form state
             setEditCurrentProduct(null);
             setEditProductInputValue('');
-            setEditQuantity(1);
+            setEditQuantity('');
             setEditPrice('');
             setDeletedItemIds([]);
             setNewEditItems([]);
@@ -325,7 +325,7 @@ const StockIntakePage = () => {
     const handleEditItemQuantity = (itemId, newQuantity) => {
         setEditItems(prev => prev.map(item =>
             item.id === itemId
-                ? { ...item, quantity: parseInt(newQuantity) || 1 }
+                ? { ...item, quantity: newQuantity === '' ? '' : (parseInt(newQuantity) || '') }
                 : item
         ));
     };
@@ -353,7 +353,7 @@ const StockIntakePage = () => {
         setNewEditItems(prev => [...prev, newItem]);
         setEditCurrentProduct(null);
         setEditProductInputValue('');
-        setEditQuantity(1);
+        setEditQuantity('');
         setEditPrice('');
     };
 
@@ -518,7 +518,7 @@ const StockIntakePage = () => {
                         type="number"
                         label="Quantity"
                         value={quantity}
-                        onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
+                        onChange={(e) => setQuantity(e.target.value === '' ? '' : parseInt(e.target.value))}
                         inputProps={{ min: 1 }}
                     />
                 </Grid>
@@ -796,8 +796,12 @@ const StockIntakePage = () => {
                             <Grid container spacing={2} alignItems="flex-end" sx={{ mb: 3 }}>
                                 <Grid item xs={12} md={5}>
                                     <Autocomplete
+                                        freeSolo
                                         options={products}
-                                        getOptionLabel={(option) => option.name}
+                                        getOptionLabel={(option) => {
+                                            if (typeof option === 'string') return option;
+                                            return option.name;
+                                        }}
                                         value={editCurrentProduct}
                                         inputValue={editProductInputValue}
                                         onInputChange={(e, newInputValue) => {
@@ -805,6 +809,11 @@ const StockIntakePage = () => {
                                         }}
                                         onChange={(e, newValue) => {
                                             setEditCurrentProduct(newValue);
+                                            if (newValue && typeof newValue !== 'string') {
+                                                setEditProductInputValue(newValue.name);
+                                            } else {
+                                                // Keep current input if string (freeSolo) or empty
+                                            }
                                         }}
                                         renderInput={(params) => (
                                             <TextField {...params} label="Select Product" placeholder="Search product" />
@@ -817,7 +826,7 @@ const StockIntakePage = () => {
                                         type="number"
                                         label="Quantity"
                                         value={editQuantity}
-                                        onChange={(e) => setEditQuantity(parseInt(e.target.value) || 1)}
+                                        onChange={(e) => setEditQuantity(e.target.value === '' ? '' : parseInt(e.target.value))}
                                         inputProps={{ min: 1 }}
                                     />
                                 </Grid>

@@ -3,6 +3,14 @@
   command = "CI=false npm run build"
   publish = "build"
 
+# Proxy API requests to Render backend
+[[redirects]]
+  from = "/api/*"
+  to = "https://jc-glasshouse.onrender.com/api/:splat"
+  status = 200
+  force = true
+
+# SPA fallback for frontend routes
 [[redirects]]
   from = "/*"
   to = "/index.html"

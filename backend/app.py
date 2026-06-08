@@ -62,36 +62,36 @@ def create_app():
             manager_password = os.environ.get('MANAGER_PASSWORD')
 
             if founder_password:
-                abbas = User.query.filter_by(username='abbas').first()
-                if not abbas:
-                    abbas = User(
-                        username='abbas',
-                        full_name='Abbas',
+                abby = User.query.filter_by(username='abby').first()
+                if not abby:
+                    abby = User(
+                        username='abby',
+                        full_name='Abby',
                         can_view_financials=True
                     )
-                    db.session.add(abbas)
-                    print("✅ Abbas user created")
-                abbas.set_password(founder_password)
+                    db.session.add(abby)
+                    print("✅ Abby user created")
+                abby.set_password(founder_password)
                 db.session.commit()
-                print("✅ Abbas password synchronized")
+                print("✅ Abby password synchronized")
             else:
-                print("⚠️ FOUNDER_PASSWORD environment variable not set. Skipping Abbas password sync/creation.")
+                print("⚠️ FOUNDER_PASSWORD environment variable not set. Skipping Abby password sync/creation.")
 
             if manager_password:
-                irfan = User.query.filter_by(username='irfan').first()
-                if not irfan:
-                    irfan = User(
-                        username='irfan',
-                        full_name='Irfan',
+                ivy = User.query.filter_by(username='ivy').first()
+                if not ivy:
+                    ivy = User(
+                        username='ivy',
+                        full_name='Ivy',
                         can_view_financials=False
                     )
-                    db.session.add(irfan)
-                    print("✅ Irfan user created")
-                irfan.set_password(manager_password)
+                    db.session.add(ivy)
+                    print("✅ Ivy user created")
+                ivy.set_password(manager_password)
                 db.session.commit()
-                print("✅ Irfan password synchronized")
+                print("✅ Ivy password synchronized")
             else:
-                print("⚠️ MANAGER_PASSWORD environment variable not set. Skipping Irfan password sync/creation.")
+                print("⚠️ MANAGER_PASSWORD environment variable not set. Skipping Ivy password sync/creation.")
 
             # Ensure Demo user is created
             demo = User.query.filter_by(username='demo').first()
@@ -159,31 +159,31 @@ def create_app():
 
     @app.cli.command("create-users")
     def create_users():
-        """Creates Abbas, Irfan and Demo users from environment variables."""
+        """Creates Abby, Ivy and Demo users from environment variables."""
         founder_password = os.environ.get('FOUNDER_PASSWORD')
         manager_password = os.environ.get('MANAGER_PASSWORD')
 
         if founder_password:
-            abbas = User.query.filter_by(username='abbas').first()
-            if not abbas:
-                abbas = User(username='abbas', full_name='Abbas', can_view_financials=True)
-                db.session.add(abbas)
-                click.echo("Creating Abbas user...")
-            abbas.set_password(founder_password)
-            click.echo("✓ Abbas user password synchronized.")
+            abby = User.query.filter_by(username='abby').first()
+            if not abby:
+                abby = User(username='abby', full_name='Abby', can_view_financials=True)
+                db.session.add(abby)
+                click.echo("Creating Abby user...")
+            abby.set_password(founder_password)
+            click.echo("✓ Abby user password synchronized.")
         else:
-            click.echo("⚠️ FOUNDER_PASSWORD environment variable not set. Skipping Abbas.")
+            click.echo("⚠️ FOUNDER_PASSWORD environment variable not set. Skipping Abby.")
 
         if manager_password:
-            irfan = User.query.filter_by(username='irfan').first()
-            if not irfan:
-                irfan = User(username='irfan', full_name='Irfan', can_view_financials=False)
-                db.session.add(irfan)
-                click.echo("Creating Irfan user...")
-            irfan.set_password(manager_password)
-            click.echo("✓ Irfan user password synchronized.")
+            ivy = User.query.filter_by(username='ivy').first()
+            if not ivy:
+                ivy = User(username='ivy', full_name='Ivy', can_view_financials=False)
+                db.session.add(ivy)
+                click.echo("Creating Ivy user...")
+            ivy.set_password(manager_password)
+            click.echo("✓ Ivy user password synchronized.")
         else:
-            click.echo("⚠️ MANAGER_PASSWORD environment variable not set. Skipping Irfan.")
+            click.echo("⚠️ MANAGER_PASSWORD environment variable not set. Skipping Ivy.")
 
         # Always ensure Demo user exists
         demo = User.query.filter_by(username='demo').first()

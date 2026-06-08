@@ -3,7 +3,7 @@ from flask_jwt_extended import jwt_required, get_jwt, get_jwt_identity
 from models import User
 
 def require_financial_access(fn):
-    """Decorator to check if user has financial access (Abbas only)"""
+    """Decorator to check if user has financial access (Abby only)"""
     @jwt_required()
     def wrapper(*args, **kwargs):
         claims = get_jwt()

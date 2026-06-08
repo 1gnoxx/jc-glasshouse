@@ -6,7 +6,7 @@ auth_bp = Blueprint('auth_bp', __name__)
 
 @auth_bp.route('/register', methods=['POST'])
 def register():
-    """Register a new user (Abbas or Irfan)"""
+    """Register a new user (Abby or Ivy)"""
     data = request.get_json()
     if not data.get('username') or not data.get('password'):
         return jsonify({"msg": "Missing username or password"}), 400

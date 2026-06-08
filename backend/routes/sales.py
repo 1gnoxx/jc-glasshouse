@@ -1,8 +1,8 @@
 """
 Sales API routes for SunroofOS wholesale inventory system
 Supports creating invoices, tracking payments, and viewing sales history
-Abbas: Full access to all sales data and financial information
-Irfan: Can create sales but cannot view sales history or financial details
+Abby: Full access to all sales data and financial information
+Ivy: Can create sales but cannot view sales history or financial details
 """
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt
@@ -34,7 +34,7 @@ def generate_invoice_number():
 def create_sale():
     """
     Create a new sale/invoice
-    Both Abbas and Irfan can create sales
+    Both Abby and Ivy can create sales
     Sales can be created without prices (pending status) and prices added later
     """
     data = request.get_json()
@@ -454,7 +454,7 @@ def update_sale(sale_id):
 def update_payment(sale_id):
     """
     Update payment status and amount paid
-    Both Abbas and Irfan can update payments
+    Both Abby and Ivy can update payments
     """
     sale = Sale.query.get_or_404(sale_id)
     data = request.get_json()
@@ -578,7 +578,7 @@ def get_payments(sale_id):
 @jwt_required()
 def get_today_sales():
     """
-    Get today's sales - limited data for Irfan, full data for Abbas
+    Get today's sales - limited data for Ivy, full data for Abby
     """
     claims = get_jwt()
     can_view_financials = claims.get('can_view_financials', False)
@@ -588,7 +588,7 @@ def get_today_sales():
     sales = Sale.query.filter(Sale.sale_date >= today_start).all()
     
     if can_view_financials:
-        # Abbas: Full financial data
+        # Abby: Full financial data
         results = []
         for sale in sales:
             results.append({
@@ -614,7 +614,7 @@ def get_today_sales():
             }
         })
     else:
-        # Irfan: Limited data (no financial info)
+        # Ivy: Limited data (no financial info)
         results = []
         for sale in sales:
             results.append({

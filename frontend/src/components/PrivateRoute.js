@@ -16,7 +16,7 @@ const PrivateRoute = ({ children, requireFinancialAccess }) => {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Check if financial access is required (for Abbas-only pages)
+  // Check if financial access is required (for Abby-only pages)
   if (requireFinancialAccess && !user?.can_view_financials) {
     // Redirect to dashboard if user doesn't have financial access
     return <Navigate to="/" replace />;

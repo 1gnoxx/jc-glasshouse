@@ -6,12 +6,12 @@ from sqlalchemy.sql import func
 db = SQLAlchemy()
 
 class User(db.Model):
-    """User model for Abbas and Irfan with financial access control"""
+    """User model for Abby and Ivy with financial access control"""
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)  # 'abbas' or 'irfan'
+    username = db.Column(db.String(80), unique=True, nullable=False)  # 'abby' or 'ivy'
     password_hash = db.Column(db.String(256))
-    full_name = db.Column(db.String(100), nullable=False)  # 'Abbas' or 'Irfan'
-    can_view_financials = db.Column(db.Boolean, default=False, nullable=False)  # Abbas: True, Irfan: False
+    full_name = db.Column(db.String(100), nullable=False)  # 'Abby' or 'Ivy'
+    can_view_financials = db.Column(db.Boolean, default=False, nullable=False)  # Abby: True, Ivy: False
     created_at = db.Column(db.DateTime, server_default=func.now())
 
     def set_password(self, password):
@@ -53,7 +53,7 @@ class Product(db.Model):
     low_stock_threshold = db.Column(db.Integer, default=5)  # Alert when stock < 5
     
     # Pricing
-    purchase_price = db.Column(db.Float, nullable=True)  # What you pay suppliers (Abbas only)
+    purchase_price = db.Column(db.Float, nullable=True)  # What you pay suppliers (Abby only)
     selling_price = db.Column(db.Float, nullable=True)  # Optional: Set if there's a standard price
     
     # Image
@@ -74,14 +74,14 @@ class Product(db.Model):
     
     @property
     def profit_margin(self):
-        """Calculate profit margin (Abbas only should see this)"""
+        """Calculate profit margin (Abby only should see this)"""
         if self.purchase_price and self.selling_price:
             return self.selling_price - self.purchase_price
         return None
     
     @property
     def profit_percentage(self):
-        """Calculate profit percentage (Abbas only should see this)"""
+        """Calculate profit percentage (Abby only should see this)"""
         if self.purchase_price and self.selling_price and self.purchase_price > 0:
             return ((self.selling_price - self.purchase_price) / self.purchase_price) * 100
         return None
@@ -124,7 +124,7 @@ class Sale(db.Model):
     payment_status = db.Column(db.String(50), default='unpaid', nullable=False)  # unpaid, partial, paid
     payment_method = db.Column(db.String(50), nullable=True)  # cash, bank_transfer, credit, upi
     
-    # Financial (Abbas only should see these)
+    # Financial (Abby only should see these)
     total_amount = db.Column(db.Float, nullable=False)  # Calculated from items
     discount_amount = db.Column(db.Float, default=0.0)
     amount_paid = db.Column(db.Float, default=0.0)

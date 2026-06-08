@@ -264,12 +264,12 @@ def migrate_stock_to_bhaijaan():
     """
     One-time migration: Assign all existing product stock to BhaiJaan warehouse.
     This creates ProductStock records for each product at BhaiJaan.
-    Only works for Abbas (admin).
+    Only works for Abby (admin).
     """
     user = get_current_user()
     
-    # Only allow Abbas (admin) to run this
-    if not user or user.username != 'abbas':
+    # Only allow Abby (admin) to run this
+    if not user or user.username != 'abby':
         return jsonify({"msg": "Only admin can run migrations"}), 403
     
     # Find BhaiJaan warehouse
@@ -347,7 +347,7 @@ def fix_schema():
     Run this if you see 'Failed to load stock intake history'
     """
     user = get_current_user()
-    if not user or user.username != 'abbas':
+    if not user or user.username != 'abby':
         return jsonify({"msg": "Only admin can run fixes"}), 403
         
     try:

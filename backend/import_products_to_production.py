@@ -28,13 +28,13 @@ app = create_app()
 
 def import_products():
     with app.app_context():
-        # Get or create Abbas user
-        abbas = User.query.filter_by(username='abbas').first()
-        if not abbas:
-            print("❌ Abbas user not found! Make sure users are created first.")
+        # Get or create Abby user
+        abby = User.query.filter_by(username='abby').first()
+        if not abby:
+            print("❌ Abby user not found! Make sure users are created first.")
             return
         
-        print(f"✅ Using user: {abbas.username} (ID: {abbas.id})")
+        print(f"✅ Using user: {abby.username} (ID: {abby.id})")
         
         # ========== IMPORT BACKLIGHT & WINDSHIELD ==========
         print("\n" + "="*50)
@@ -94,7 +94,7 @@ def import_products():
             supplier_name='Excel Import - Backlight & Windshield',
             notes='Imported from ALL BACKLIGHT AND WINDSHIELD.xlsx',
             status='pending',
-            created_by_user_id=abbas.id
+            created_by_user_id=abby.id
         )
         db.session.add(intake1)
         db.session.flush()
@@ -151,7 +151,7 @@ def import_products():
             supplier_name='Excel Import - All Sunroofs',
             notes='Imported from all sunroof.xlsx',
             status='pending',
-            created_by_user_id=abbas.id
+            created_by_user_id=abby.id
         )
         db.session.add(intake2)
         db.session.flush()

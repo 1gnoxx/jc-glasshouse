@@ -61,7 +61,7 @@ function App() {
               <Route path="/catalog" element={<CarCatalog />} />
               <Route path="/timeline" element={<ActivityTimeline />} />
 
-              {/* Abbas-only routes (require financial access) */}
+              {/* Abby-only routes (require financial access) */}
               <Route
                 path="/reports"
                 element={

@@ -12,27 +12,27 @@ with app.app_context():
     db.create_all()
     print("✅ Database tables created")
     
-    # Create Abbas (owner with financial access)
-    if not User.query.filter_by(username='abbas').first():
-        abbas = User(
-            username='abbas',
-            full_name='Abbas',
+    # Create Abby (owner with financial access)
+    if not User.query.filter_by(username='abby').first():
+        abby = User(
+            username='abby',
+            full_name='Abby',
             can_view_financials=True
         )
-        abbas.set_password('abbas123')
-        db.session.add(abbas)
-        print("✓ Abbas user created")
+        abby.set_password('abby123')
+        db.session.add(abby)
+        print("✓ Abby user created")
     
     # Create Ir fan (manager without financial access)
-    if not User.query.filter_by(username='irfan').first():
-        irfan = User(
-            username='irfan',
-            full_name='Irfan',
+    if not User.query.filter_by(username='ivy').first():
+        ivy = User(
+            username='ivy',
+            full_name='Ivy',
             can_view_financials=False
         )
-        irfan.set_password('irfan123')
-        db.session.add(irfan)
-        print("✓ Irfan user created")
+        ivy.set_password('ivy123')
+        db.session.add(ivy)
+        print("✓ Ivy user created")
     
     db.session.commit()
     
@@ -40,6 +40,6 @@ with app.app_context():
     print("✅ Database initialized successfully!")
     print("="*50)
     print("\nLogin credentials:")
-    print("  Abbas (Owner): username='abbas', password='abbas123'")
-    print("  Irfan (Manager): username='irfan', password='irfan123'")
+    print("  Abby (Owner): username='abby', password='abby123'")
+    print("  Ivy (Manager): username='ivy', password='ivy123'")
     print("\n⚠️  Change these passwords in production!")

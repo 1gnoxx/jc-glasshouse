@@ -130,7 +130,7 @@ def get_products():
             'is_active': product.is_active
         }
         
-        # Include financial data only for Abbas
+        # Include financial data only for Abby
         if can_view_financials:
             product_data['purchase_price'] = product.purchase_price
             product_data['profit_margin'] = product.profit_margin
@@ -149,7 +149,7 @@ def get_products():
 def create_product():
     """
     Create a new product
-    Both Abbas and Irfan can create products
+    Both Abby and Ivy can create products
     """
     data = request.get_json()
     

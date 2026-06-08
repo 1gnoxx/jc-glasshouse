@@ -200,6 +200,24 @@ const Login = () => {
             >
               Sign In
             </Button>
+            <Box
+              sx={{
+                mt: 1,
+                p: 1.5,
+                borderRadius: 2,
+                bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(99, 102, 241, 0.08)' : 'rgba(99, 102, 241, 0.04)',
+                border: '1px dashed',
+                borderColor: 'primary.light',
+                textAlign: 'center'
+              }}
+            >
+              <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
+                Want to test the app? Use the demo account:
+              </Typography>
+              <Typography variant="body2" fontWeight="bold" color="primary.main">
+                Username: <code>demo</code> &nbsp;|&nbsp; Password: <code>demo</code>
+              </Typography>
+            </Box>
           </Box>
         </Box>
       </Paper>

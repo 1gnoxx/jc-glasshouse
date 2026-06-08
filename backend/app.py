@@ -1,6 +1,6 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_migrate import Migrate
-from flask_jwt_extended import JWTManager
+from flask_jwt_extended import JWTManager, get_jwt_identity, verify_jwt_in_request
 from flask_cors import CORS
 import click
 import os
@@ -56,32 +56,58 @@ def create_app():
         except Exception as e:
             print(f"⚠️ Table creation note: {e}")
         
-        # Step 2: Create default users (if they don't exist)
+        # Step 2: Create/update default users and sync passwords from environment variables
         try:
-            if not User.query.filter_by(username='abbas').first():
-                abbas = User(
-                    username='abbas',
-                    full_name='Abbas',
+            founder_password = os.environ.get('FOUNDER_PASSWORD')
+            manager_password = os.environ.get('MANAGER_PASSWORD')
+
+            if founder_password:
+                abbas = User.query.filter_by(username='abbas').first()
+                if not abbas:
+                    abbas = User(
+                        username='abbas',
+                        full_name='Abbas',
+                        can_view_financials=True
+                    )
+                    db.session.add(abbas)
+                    print("✅ Abbas user created")
+                abbas.set_password(founder_password)
+                db.session.commit()
+                print("✅ Abbas password synchronized")
+            else:
+                print("⚠️ FOUNDER_PASSWORD environment variable not set. Skipping Abbas password sync/creation.")
+
+            if manager_password:
+                irfan = User.query.filter_by(username='irfan').first()
+                if not irfan:
+                    irfan = User(
+                        username='irfan',
+                        full_name='Irfan',
+                        can_view_financials=False
+                    )
+                    db.session.add(irfan)
+                    print("✅ Irfan user created")
+                irfan.set_password(manager_password)
+                db.session.commit()
+                print("✅ Irfan password synchronized")
+            else:
+                print("⚠️ MANAGER_PASSWORD environment variable not set. Skipping Irfan password sync/creation.")
+
+            # Ensure Demo user is created
+            demo = User.query.filter_by(username='demo').first()
+            if not demo:
+                demo = User(
+                    username='demo',
+                    full_name='Demo User',
                     can_view_financials=True
                 )
-                abbas.set_password('abbasarva31377')
-                db.session.add(abbas)
+                demo.set_password('demo')
+                db.session.add(demo)
                 db.session.commit()
-                print("✅ Abbas user created")
-            
-            if not User.query.filter_by(username='irfan').first():
-                irfan = User(
-                    username='irfan',
-                    full_name='Irfan',
-                    can_view_financials=False
-                )
-                irfan.set_password('irfanbhai123')
-                db.session.add(irfan)
-                db.session.commit()
-                print("✅ Irfan user created")
+                print("✅ Demo user created")
         except Exception as e:
             db.session.rollback()
-            print(f"⚠️ User creation note: {e}")
+            print(f"⚠️ User creation/sync note: {e}")
         
         # Step 3: Create default warehouses (if they don't exist)
         try:
@@ -133,35 +159,41 @@ def create_app():
 
     @app.cli.command("create-users")
     def create_users():
-        """Creates Abbas (owner) and Irfan (manager) users."""
-        # Create Abbas with financial access
-        if not User.query.filter_by(username='abbas').first():
-            click.echo("Creating Abbas (Owner) user...")
-            abbas = User(
-                username='abbas',
-                full_name='Abbas',
-                can_view_financials=True
-            )
-            abbas.set_password('abbas123')  # Change this in production!
-            db.session.add(abbas)
-            click.echo("✓ Abbas user created (username: abbas, password: abbas123)")
+        """Creates Abbas, Irfan and Demo users from environment variables."""
+        founder_password = os.environ.get('FOUNDER_PASSWORD')
+        manager_password = os.environ.get('MANAGER_PASSWORD')
+
+        if founder_password:
+            abbas = User.query.filter_by(username='abbas').first()
+            if not abbas:
+                abbas = User(username='abbas', full_name='Abbas', can_view_financials=True)
+                db.session.add(abbas)
+                click.echo("Creating Abbas user...")
+            abbas.set_password(founder_password)
+            click.echo("✓ Abbas user password synchronized.")
         else:
-            click.echo("Abbas user already exists.")
-        
-        # Create Irfan without financial access
-        if not User.query.filter_by(username='irfan').first():
-            click.echo("Creating Irfan (Manager) user...")
-            irfan = User(
-                username='irfan',
-                full_name='Irfan',
-                can_view_financials=False
-            )
-            irfan.set_password('irfan123')  # Change this in production!
-            db.session.add(irfan)
-            click.echo("✓ Irfan user created (username: irfan, password: irfan123)")
+            click.echo("⚠️ FOUNDER_PASSWORD environment variable not set. Skipping Abbas.")
+
+        if manager_password:
+            irfan = User.query.filter_by(username='irfan').first()
+            if not irfan:
+                irfan = User(username='irfan', full_name='Irfan', can_view_financials=False)
+                db.session.add(irfan)
+                click.echo("Creating Irfan user...")
+            irfan.set_password(manager_password)
+            click.echo("✓ Irfan user password synchronized.")
         else:
-            click.echo("Irfan user already exists.")
-        
+            click.echo("⚠️ MANAGER_PASSWORD environment variable not set. Skipping Irfan.")
+
+        # Always ensure Demo user exists
+        demo = User.query.filter_by(username='demo').first()
+        if not demo:
+            demo = User(username='demo', full_name='Demo User', can_view_financials=True)
+            db.session.add(demo)
+            click.echo("Creating Demo user...")
+        demo.set_password('demo')
+        click.echo("✓ Demo user password synchronized (password: demo).")
+
         db.session.commit()
         click.echo("\n" + "="*50)
         click.echo("✅ User setup complete!")
@@ -199,6 +231,40 @@ def create_app():
         else:
             # Outside working hours - just return OK without DB ping
             return f'OK - Off Hours (IST: {ist_time.strftime("%H:%M")})', 200
+
+    @app.before_request
+    def handle_demo_user():
+        # Only inspect API requests, skip health checks, static assets, and login/register
+        path = request.path
+        if not path.startswith('/api/'):
+            return
+        if path in ['/api/auth/login', '/api/auth/register']:
+            return
+
+        # Verify JWT optional
+        try:
+            # If no Authorization header is present (such as in OPTIONS preflight or public endpoints), skip
+            if not request.headers.get('Authorization'):
+                return
+            verify_jwt_in_request(optional=True)
+        except Exception:
+            # Let default Flask JWT route decorator handle invalid/expired tokens
+            return
+
+        identity = get_jwt_identity()
+        if identity == 'demo':
+            # Block write actions
+            if request.method not in ['GET', 'OPTIONS']:
+                return jsonify({"msg": "Action not allowed in Demo mode. Log in as an administrator to make changes."}), 403
+
+            # Intercept read actions
+            from routes.demo_data import get_mock_response
+            response_data = get_mock_response(path, request.args)
+            if response_data is not None:
+                # get_mock_response might return a tuple (data, status)
+                if isinstance(response_data, tuple):
+                    return jsonify(response_data[0]), response_data[1]
+                return jsonify(response_data)
 
     return app
 
